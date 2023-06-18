@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import environ
 
+# These are the default values if none are set
+from datetime import timedelta
+from rest_framework.settings import api_settings
+
 # Initialise environment variables
 env = environ.Env()
 environ.Env.read_env()
@@ -43,7 +47,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "user_management",
     "stock_management",
-    "order_management"
+    "order_management",
+    "rest_framework",
+    "knox"
 ]
 
 AUTH_USER_MODEL = "user_management.AppUser"
@@ -108,6 +114,20 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+}
+
+REST_KNOX = {
+    'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
+    'AUTH_TOKEN_CHARACTER_LENGTH': 64,
+    'TOKEN_TTL': timedelta(hours=10),
+    'USER_SERIALIZER': 'knox.serializers.UserSerializer',
+    'TOKEN_LIMIT_PER_USER': None,
+    'AUTO_REFRESH': False,
+    'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
+}
 
 
 # Internationalization

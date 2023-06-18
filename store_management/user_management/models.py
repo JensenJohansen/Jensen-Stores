@@ -39,14 +39,16 @@ class AppUser(AbstractBaseUser,PermissionsMixin):
     first_name=models.CharField(_("First name"), max_length=100)
     last_name=models.CharField(_("Last name"), max_length=100)
     phone_number=models.CharField(_("Phone number"),max_length=15)
-    owner=models.ManyToManyField(Company,verbose_name=_("company owner"),related_query_name="company_owners")
-    role=models.ManyToManyField(Role,verbose_name=_("User's role"),related_query_name="user_roles")
+    user_company=models.ForeignKey(Company,verbose_name=_("Users company"),related_name='user_company',on_delete=models.CASCADE,null=True,blank=True)
+    role=models.ManyToManyField(Role,verbose_name=_("User's role"))
+    is_staff=models.BooleanField(_("Is a user staff"),default=False)
+    is_active=models.BooleanField(_("Is a user active"),default=True)
     
     USERNAME_FIELD="username"
     
     REQUIRED_FIELDS = ["first_name","last_name","phone_number"]
     
-    objects = CustomUserManager
+    objects = CustomUserManager()
 
     def __str__(self):
         return self.username
