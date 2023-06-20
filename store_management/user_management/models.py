@@ -13,7 +13,7 @@ class Company(models.Model):
 
     class Meta:
         '''Meta definition for Company.'''
-
+        unique_together=('company_name','company_location','company_tin',)
         verbose_name = 'Company'
         verbose_name_plural = 'Companys'
 
@@ -27,7 +27,7 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(_("Last name"), max_length=100)
     phone_number = models.CharField(_("Phone number"), max_length=15)
     user_company = models.ForeignKey(Company, verbose_name=_("Users company"), related_name='user_company',
-                                     on_delete=models.CASCADE, null=True, blank=True)
+                                    on_delete=models.CASCADE, null=True, blank=True)
     is_staff = models.BooleanField(_("Is a user staff"), default=False)
     is_active = models.BooleanField(_("Is a user active"), default=True)
 

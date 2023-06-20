@@ -3,6 +3,7 @@ from django.db.models import Q, F
 from rest_framework import serializers
 from django.core.serializers import serialize
 from .models import Company, AppUser
+from django.contrib.auth import authenticate,login
 
 
 class CompanyUserListingField(serializers.Serializer):
@@ -22,28 +23,31 @@ class CompanySerializer(serializers.ModelSerializer):
         model = Company
         fields = '__all__'
 
-    def save(self, validated_data):
+    def create(self, validated_data):
         """
         Purpose: Create a Company Profile
         """
         company_owner = validated_data.pop('owner')
-
-        company = Company.objects.create(**validated_data)
-        if company_owner is not None:
-            for own in company_owner:
-                own_role = own.pop('user_groups')
-                try:
-                    owner = AppUser.objects.get(username=own['username'])
-                except AppUser.DoesNotExist:
-                    owner = AppUser.objects.create_user(user_company=company, **own)
-                for role in own_role:
-                    role = Group.objects.get(name=role.title())
-                    owner.groups.add(role)
-        return company
+        
+        if Company.objects.get(**validated_data).exists():
+            raise serializersValidationError("This Company already exists")
+        else:
+            company=Company.objects.create(**validated_data)
+            if company_owner is not None:
+                for own in company_owner:
+                    own_role = own.pop('user_groups')
+                    try:
+                        owner = AppUser.objects.get(username=own['username'])
+                    except AppUser.DoesNotExist:
+                        owner = AppUser.objects.create_user(user_company=company, **own)
+                    for role in own_role:
+                        role = Group.objects.get(name=role.title())
+                        owner.groups.add(role)
+            return company
     # end def
 
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     company_owners = CompanySerializer(many=True, read_only=True)
 
     class Meta:
@@ -60,7 +64,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user_group = validated_data.pop('user_groups')
         user_company = validated_data.pop('company')
         try:
-            user_company = Company.objects.get(company_name=user_company)
+            user_company = Company.objects.get(company_name=str(user_company).title())
         except Company.DoesNotExist:
             user_company = None
 
@@ -74,3 +78,25 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
         return user
     # end def
+
+
+class LoginSerializer(serializers.Serializer):
+    username=serializers.CharField(max_length=150)
+    password=serializers.CharField(style={'input_type':'password'},trim_whitespace=False)
+    
+    def validate(self,attrs):
+        username=attrs.get('username').capitalize()
+        password =attrs.get('password')
+        
+        if not username or not password:
+            raise serializer.ValidatorError('Provide both username and password')
+        
+        if not AppUser.objects.filter(username=username).exists():
+            raise serializers.ValidationError('User does not exist')
+        user=authenticate(request=self.context.get('request'),username=username,password=password)
+            
+        if not user:
+            raise serializers.ValidationError('Wrong credentials')
+        attrs['user']=user
+        
+        return attrs

@@ -2,14 +2,32 @@ from django.shortcuts import render
 from .serializers import *
 from rest_framework.generics import *
 from knox.views import LoginView as KnoxLoginView
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication
-from rest_framework.permissions import IsAuthenticated
+from knox.views import LogoutView as KnoxLogoutView
+from rest_framework.authentication import BasicAuthentication, SessionAuthentication,TokenAuthentication
+from rest_framework.permissions import IsAuthenticated,AllowAny
 from rest_framework.response import Response
 from rest_framework.status import *
 
 
 class LoginView(KnoxLoginView):
     authentication_classes = [BasicAuthentication]
+    permission_classes=(AllowAny,)
+    serializer_class=LoginSerializer
+    
+    def post(self, request,format=None):
+        serializer=self.serializer_class(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            user=serializer.validated_data['user']
+            login(request,user)
+            response=super().post(request, format=None)
+        else:
+            Response({'errors':serializer.errors},status=HTTP_400_BAD_REQUEST)
+            
+        return Response({'data':response.data},status=HTTP_200_OK)
+    
+class LogoutView(KnoxLogoutView):
+    permission_classes=[IsAuthenticated]
+
 
 
 class CompanyCreateAPIView(ListCreateAPIView):
@@ -38,7 +56,7 @@ class CompanyRetrieveUpdateDestroyAPIView(RetrieveDestroyAPIView):
 
 class AppUserCreateAPIView(CreateAPIView):
     queryset = AppUser.objects.all()
-    serializer_class = UserRegistrationSerializer
+    serializer_class = UserSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
     permission_classes = [IsAuthenticated]
 
