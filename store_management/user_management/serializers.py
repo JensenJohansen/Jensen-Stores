@@ -30,7 +30,7 @@ class CompanySerializer(serializers.ModelSerializer):
         company_owner = validated_data.pop('owner')
         
         if Company.objects.get(**validated_data).exists():
-            raise serializersValidationError("This Company already exists")
+            raise serializers.ValidationError("This Company already exists")
         else:
             company=Company.objects.create(**validated_data)
             if company_owner is not None:
@@ -89,7 +89,7 @@ class LoginSerializer(serializers.Serializer):
         password =attrs.get('password')
         
         if not username or not password:
-            raise serializer.ValidatorError('Provide both username and password')
+            raise serializers.ValidatorError('Provide both username and password')
         
         if not AppUser.objects.filter(username=username).exists():
             raise serializers.ValidationError('User does not exist')
