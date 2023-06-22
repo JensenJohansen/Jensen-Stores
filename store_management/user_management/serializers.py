@@ -1,7 +1,6 @@
 from django.contrib.auth.models import Group
 from django.db.models import Q, F
 from rest_framework import serializers
-from django.core.serializers import serialize
 from .models import Company, AppUser
 from django.contrib.auth import authenticate,login
 
@@ -18,7 +17,7 @@ class CompanyUserListingField(serializers.Serializer):
 
 class CompanySerializer(serializers.ModelSerializer):
     user_company = CompanyUserListingField(many=True, read_only=True)
-
+    owner=serializers.JSONField(write_only=True)
     class Meta:
         model = Company
         fields = '__all__'
@@ -29,7 +28,7 @@ class CompanySerializer(serializers.ModelSerializer):
         """
         company_owner = validated_data.pop('owner')
         
-        if Company.objects.get(**validated_data).exists():
+        if Company.objects.filter(**validated_data).exists():
             raise serializers.ValidationError("This Company already exists")
         else:
             company=Company.objects.create(**validated_data)
@@ -64,7 +63,7 @@ class UserSerializer(serializers.ModelSerializer):
         user_group = validated_data.pop('user_groups')
         user_company = validated_data.pop('company')
         try:
-            user_company = Company.objects.get(company_name=str(user_company).title())
+            user_company = Company.objects.get(company_name=user_company)
         except Company.DoesNotExist:
             user_company = None
 
@@ -82,7 +81,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 class LoginSerializer(serializers.Serializer):
     username=serializers.CharField(max_length=150)
-    password=serializers.CharField(style={'input_type':'password'},trim_whitespace=False)
+    password=serializers.CharField(style={'input_type':'password'},trim_whitespace=False,write_only=True)
+    first_name=serializers.CharField(read_only=True,max_length=150)
+    last_name=serializers.CharField(read_only=True,max_length=150)
+    phone_number=serializers.CharField(read_only=True,max_length=150)
+    user_company=CompanySerializer(read_only=True)
+    
     
     def validate(self,attrs):
         username=attrs.get('username').capitalize()
