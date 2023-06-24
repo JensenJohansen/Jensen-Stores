@@ -89,7 +89,7 @@ class LoginSerializer(serializers.Serializer):
     
     
     def validate(self,attrs):
-        username=attrs.get('username').capitalize()
+        username=attrs.get('username')  #removed the capitalize method just to make the validation match with the data saved
         password =attrs.get('password')
         
         if not username or not password:

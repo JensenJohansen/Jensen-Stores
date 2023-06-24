@@ -19,7 +19,7 @@ class LoginView(KnoxLoginView):
         serializer=self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
             user=serializer.validated_data['user']
-            login(request,user)
+            login(request, user)
             response=super().post(request, format=None)
         else:
             Response({'errors':serializer.errors},status=HTTP_400_BAD_REQUEST)
