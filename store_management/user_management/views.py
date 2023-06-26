@@ -52,9 +52,8 @@ class CompanyCreateAPIView(ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=self.request.data)
         if serializer.is_valid(raise_exception=True):
-            company = serializer.save()
-            company = self.serializer_class(company)
-            return Response(data=company.data, status=HTTP_201_CREATED)
+            serializer.save()
+            return Response(data=serializer.data, status=HTTP_201_CREATED)
         else:
             return Response(status=HTTP_304_NOT_MODIFIED)
 
