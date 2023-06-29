@@ -15,11 +15,16 @@ class CustomUserAdmin(UserAdmin):
         (None, {"fields": ("username", "password")}),
         ("Permissions", {"fields": ("is_staff", "is_active", "groups", "user_permissions")}),
     )
+    
+    """
+    In fields below, i had to replace email with username, as email never defined in the model before 
+    but also username was selected to be the login credential.
+    """
     add_fieldsets = (
         (None, {
             "classes": ("wide",),
             "fields": (
-                "email", "password1", "password2", "is_staff",
+                "username", "password1", "password2", "is_staff",
                 "is_active", "groups", "user_permissions"
             )}
         ),

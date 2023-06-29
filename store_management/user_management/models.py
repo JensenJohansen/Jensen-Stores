@@ -26,12 +26,15 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(_("First name"), max_length=100)
     last_name = models.CharField(_("Last name"), max_length=100)
     phone_number = models.CharField(_("Phone number"), max_length=15)
+    email = models.EmailField(max_length=100, blank=True, null=True) #important field if you decide to inherit the properties
     user_company = models.ForeignKey(Company, verbose_name=_("Users company"), related_name='user_company',
                                     on_delete=models.CASCADE, null=True, blank=True)
     is_staff = models.BooleanField(_("Is a user staff"), default=False)
     is_active = models.BooleanField(_("Is a user active"), default=True)
 
     USERNAME_FIELD = "username"
+    
+    EMAIL_FIELD = "email"
 
     REQUIRED_FIELDS = ["first_name", "last_name", "phone_number"]
 
