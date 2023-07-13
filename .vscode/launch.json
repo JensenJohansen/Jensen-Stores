@@ -11,7 +11,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/store_management/manage.py",
             "args": [
-                "runserver"
+                "runserver",
+                "192.168.100.28:8001"
             ],
             "django": true,
             "justMyCode": true

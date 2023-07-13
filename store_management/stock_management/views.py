@@ -72,7 +72,7 @@ class LeastStockGoodsListAPIView(ListAPIView):
     lookup_field='goods_quantity'
     
     def get_queryset(self):
-        queryset=Goods.objects.values().filter(goods_quantity__lte=self.kwargs['number_of_goods']).order_by('id')
+        queryset=Goods.objects.filter(goods_quantity__lte=self.kwargs['threshold']).order_by('id')
         return queryset
     
 

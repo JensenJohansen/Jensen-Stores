@@ -9,5 +9,6 @@ urlpatterns = [
     path("goods/", GoodsListCreateAPIView.as_view(), name="goods"),
     path("goods/<int:id>/", GoodsRetrieveUpdateDestroyAPIView.as_view(), name="goods_single"),
     path("goods_update/", UpdateStockListCreateAPIView.as_view(), name="update_stock"),
-    path("goods_update_entry/<int:goods>/", GoodsUpdateListAPIView.as_view(), name="goods_update_entry")
+    path("goods_update_entry/<int:goods>/", GoodsUpdateListAPIView.as_view(), name="goods_update_entry"),
+    path("least_goods_quantity/<int:threshold>/", LeastStockGoodsListAPIView.as_view(), name="least_goods_quantity")
 ]

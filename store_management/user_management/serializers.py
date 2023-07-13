@@ -62,6 +62,7 @@ class UserSerializer(serializers.ModelSerializer):
         """
         user_group = validated_data.pop('user_groups')
         user_company = validated_data.pop('company')
+        validated_data['username']=validated_data['username'].capitalize()
         try:
             user_company = Company.objects.get(company_name=user_company)
         except Company.DoesNotExist:
