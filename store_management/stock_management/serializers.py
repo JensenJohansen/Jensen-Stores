@@ -25,16 +25,18 @@ class GoodsSerializer(serializers.ModelSerializer):
 
 class BalanceOnUpdate(serializers.Serializer):
     def to_representation(self, instance):
-        goods = instance.validated_data.pop('goods')
+        return instance.values
+        """goods = instance.get('goods')
+        updated_quantity = instance.get('quantity_added')
+        
         try:
             prev_goods = Goods.objects.get(id=goods.id)
             prev_quantity = prev_goods.goods_quantity
         except:
             raise Goods.DoesNotExist
         
-        updated_quantity = goods.goods_quantity
         balance = prev_quantity + updated_quantity
-        return balance
+        return balance"""
 
 
 class UpdateStockSerializer(serializers.ModelSerializer):
@@ -71,5 +73,6 @@ class UpdateStockSerializer(serializers.ModelSerializer):
             goods.save()
         except Exception as e:
             raise e
-        return updated_goods
+        return validated_data
     # end def
+    

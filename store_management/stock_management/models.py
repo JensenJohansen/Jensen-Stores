@@ -69,4 +69,3 @@ class GoodsUpdate(models.Model):
     quantity_available=models.IntegerField(_("Quantity available"))
     quantity_added=models.IntegerField(_("Quantity added"))
     updated_on=models.DateField(_("Date goods updated"), auto_now=True)
-
