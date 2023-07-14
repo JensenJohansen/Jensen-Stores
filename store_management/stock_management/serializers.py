@@ -25,27 +25,17 @@ class GoodsSerializer(serializers.ModelSerializer):
 
 class BalanceOnUpdate(serializers.Serializer):
     def to_representation(self, instance):
-        return instance.values
-        """goods = instance.get('goods')
-        updated_quantity = instance.get('quantity_added')
-        
-        try:
-            prev_goods = Goods.objects.get(id=goods.id)
-            prev_quantity = prev_goods.goods_quantity
-        except:
-            raise Goods.DoesNotExist
-        
-        balance = prev_quantity + updated_quantity
-        return balance"""
+        pass
 
 
 class UpdateStockSerializer(serializers.ModelSerializer):
     goods=serializers.PrimaryKeyRelatedField(queryset=Goods.objects.all())
     updated_by=serializers.SlugRelatedField(slug_field='username',queryset=get_user_model().objects.all())
-    balance=BalanceOnUpdate(read_only=True)
+    balance=serializers.IntegerField(read_only=True)
+    
     class Meta:
         model=GoodsUpdate
-        fields='__all__'
+        fields= '__all__'
         read_only_fields=('quantity_available',)
 
     def create(self, validated_data):
@@ -68,11 +58,14 @@ class UpdateStockSerializer(serializers.ModelSerializer):
         try:
             updated_goods=GoodsUpdate.objects.create(**validated_data,goods=goods,updated_by=user,
                                             quantity_available=quantity_available)
-            
             goods.goods_quantity=quantity_available+validated_data['quantity_added']
             goods.save()
         except Exception as e:
             raise e
-        return validated_data
+        return updated_goods
+    
+    def to_representation(self, instance):
+        instance.balance=instance.quantity_available+instance.quantity_added
+        return super().to_representation(instance)
     # end def
     
