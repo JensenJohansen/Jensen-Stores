@@ -9,6 +9,8 @@ def validate_value(value):
             _('%(value)s should be greater than 0'),
             params={'value': value},
         )
+
+
 class GoodsType(models.Model):
     '''Model definition for GoodsType.'''
     goods_type=models.CharField(_("Goods type"), max_length=150)
@@ -16,12 +18,13 @@ class GoodsType(models.Model):
 
     class Meta:
         '''Meta definition for GoodsType.'''
-
         verbose_name = 'GoodsType'
         verbose_name_plural = 'GoodsTypes'
 
     def __str__(self):
         return self.goods_type
+    
+    
 class Store(models.Model):
     '''Model definition for Store.'''
     store_name=models.CharField(_("Store name"), max_length=150)
@@ -38,7 +41,8 @@ class Store(models.Model):
 
     def __str__(self):
         return self.store_name
-    
+
+
 class Goods(models.Model):
     '''Model definition for Goods.'''
     goods_name=models.CharField(_("Goods name"), max_length=150)
@@ -57,6 +61,7 @@ class Goods(models.Model):
 
     def __str__(self):
         return self.goods_number
+
 
 class GoodsUpdate(models.Model):
     goods=models.ForeignKey(Goods, verbose_name=_("Goods to be updated"), on_delete=models.CASCADE)

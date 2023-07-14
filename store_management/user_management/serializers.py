@@ -10,10 +10,15 @@ class CompanyUserListingField(serializers.Serializer):
         """
         Purpose: This displays company and their owners.
         """
-        company_owner = AppUser.objects.values('id','first_name','last_name','username','groups__name').get(id=user_company.id)
+        company_owner = AppUser.objects.values('id','first_name','last_name','username').get(id=user_company.id)
         return company_owner
     # end def
 
+
+class UserGroupField(serializers.Serializer):
+    def to_representation(self, instance):
+        groups = Group.objects.values('name').get(id=instance.id)
+        return groups
 
 class CompanySerializer(serializers.ModelSerializer):
     user_company = CompanyUserListingField(many=True, read_only=True)
@@ -40,7 +45,7 @@ class CompanySerializer(serializers.ModelSerializer):
                     except AppUser.DoesNotExist:
                         owner = AppUser.objects.create_user(user_company=company, **own)
                     for role in own_role:
-                        role = Group.objects.get(name=role.title())
+                        role = Group.objects.get(name=role) #removing .title to match queries
                         owner.groups.add(role)
             return company
     # end def
@@ -62,7 +67,6 @@ class UserSerializer(serializers.ModelSerializer):
         """
         user_group = validated_data.pop('user_groups')
         user_company = validated_data.pop('company')
-        validated_data['username']=validated_data['username'].capitalize()
         try:
             user_company = Company.objects.get(company_name=user_company)
         except Company.DoesNotExist:
@@ -72,7 +76,6 @@ class UserSerializer(serializers.ModelSerializer):
 
         if user_group is not None:
             for userrole in user_group:
-                userrole=userrole.title()
                 group = Group.objects.get(name=userrole)
                 user.groups.add(group)
 
@@ -86,11 +89,12 @@ class LoginSerializer(serializers.Serializer):
     first_name=serializers.CharField(read_only=True,max_length=150)
     last_name=serializers.CharField(read_only=True,max_length=150)
     phone_number=serializers.CharField(read_only=True,max_length=150)
+    groups = UserGroupField(many=True, read_only=True)
     user_company=CompanySerializer(read_only=True)
     
     
     def validate(self,attrs):
-        username=attrs.get('username')  #removed the capitalize method just to make the validation match with the data saved
+        username=attrs.get('username')
         password =attrs.get('password')
         
         if not username or not password:

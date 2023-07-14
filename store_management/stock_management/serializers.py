@@ -21,12 +21,26 @@ class GoodsSerializer(serializers.ModelSerializer):
     class Meta:
         model=Goods
         fields='__all__'
-    
+
+
+class BalanceOnUpdate(serializers.Serializer):
+    def to_representation(self, instance):
+        goods = instance.validated_data.pop('goods')
+        try:
+            prev_goods = Goods.objects.get(id=goods.id)
+            prev_quantity = prev_goods.goods_quantity
+        except:
+            raise Goods.DoesNotExist
+        
+        updated_quantity = goods.goods_quantity
+        balance = prev_quantity + updated_quantity
+        return balance
+
 
 class UpdateStockSerializer(serializers.ModelSerializer):
     goods=serializers.PrimaryKeyRelatedField(queryset=Goods.objects.all())
     updated_by=serializers.SlugRelatedField(slug_field='username',queryset=get_user_model().objects.all())
-    balance=serializers.IntegerField(read_only=True)
+    balance=BalanceOnUpdate(read_only=True)
     class Meta:
         model=GoodsUpdate
         fields='__all__'
@@ -50,7 +64,8 @@ class UpdateStockSerializer(serializers.ModelSerializer):
         except:
             raise Goods.DoesNotExist
         try:
-            updated_goods=GoodsUpdate.objects.create(**validated_data,goods=goods,updated_by=user,quantity_available=quantity_available)
+            updated_goods=GoodsUpdate.objects.create(**validated_data,goods=goods,updated_by=user,
+                                            quantity_available=quantity_available)
             
             goods.goods_quantity=quantity_available+validated_data['quantity_added']
             goods.save()
