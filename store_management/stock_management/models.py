@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 
 def validate_value(value):
@@ -26,8 +26,8 @@ class Store(models.Model):
     '''Model definition for Store.'''
     store_name=models.CharField(_("Store name"), max_length=150)
     store_location=models.CharField(_("Store location"), max_length=150)
-    store_supervisor=models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("store supervisor"),related_name='store_keeper', on_delete=models.SET_NULL,blank=True, null=True)
-    added_by=models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("User who added store"),related_name='store_adder', on_delete=models.DO_NOTHING,blank=True, null=True)
+    store_supervisor=models.ForeignKey(get_user_model(), verbose_name=_("store supervisor"),related_name='store_keeper', on_delete=models.SET_NULL,blank=True, null=True)
+    added_by=models.ForeignKey(get_user_model(), verbose_name=_("User who added store"),related_name='store_adder', on_delete=models.DO_NOTHING,blank=True, null=True)
     date_added=models.DateTimeField(_("Date store registered"), auto_now=True)
 
     class Meta:
@@ -47,14 +47,21 @@ class Goods(models.Model):
     goods_size=models.ForeignKey(GoodsType, verbose_name=_("goods type or size"),related_name='size', on_delete=models.DO_NOTHING)
     lower_price_margin=models.FloatField(_("Lowest price of a product"),validators=[validate_value])
     store=models.ForeignKey(Store, verbose_name=_("store goods found"),related_name='store', on_delete=models.DO_NOTHING)
-    added_by=models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("User who added goods"), on_delete=models.DO_NOTHING)
+    added_by=models.ForeignKey(get_user_model(), verbose_name=_("User who added goods"), on_delete=models.DO_NOTHING)
     date_added=models.DateTimeField(_("date goods added"), auto_now=True)
     class Meta:
         '''Meta definition for Goods.'''
-
+        unique_together=['goods_number','store',]
         verbose_name = 'Goods'
-        verbose_name_plural = 'Goodss'
+        verbose_name_plural = 'Goods'
 
     def __str__(self):
-        return self.goods_name
+        return self.goods_number
+
+class GoodsUpdate(models.Model):
+    goods=models.ForeignKey(Goods, verbose_name=_("Goods to be updated"), on_delete=models.CASCADE)
+    updated_by=models.ForeignKey(get_user_model(), verbose_name=_("User who updated goods"), on_delete=models.DO_NOTHING)
+    quantity_available=models.IntegerField(_("Quantity available"))
+    quantity_added=models.IntegerField(_("Quantity added"))
+    updated_on=models.DateField(_("Date goods updated"), auto_now=True)
 
