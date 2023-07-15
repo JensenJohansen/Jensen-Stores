@@ -23,11 +23,6 @@ class GoodsSerializer(serializers.ModelSerializer):
         fields='__all__'
 
 
-class BalanceOnUpdate(serializers.Serializer):
-    def to_representation(self, instance):
-        pass
-
-
 class UpdateStockSerializer(serializers.ModelSerializer):
     goods=serializers.PrimaryKeyRelatedField(queryset=Goods.objects.all())
     updated_by=serializers.SlugRelatedField(slug_field='username',queryset=get_user_model().objects.all())
