@@ -42,7 +42,6 @@ class GoodsSerializer(serializers.ModelSerializer):
 
 class UpdateStockSerializer(serializers.ModelSerializer):
     goods=serializers.PrimaryKeyRelatedField(queryset=Goods.objects.all())
-    #updated_by = StoreKeeperSerializer()
     updated_by=serializers.SlugRelatedField(slug_field='username',queryset=get_user_model().objects.all())
     balance=serializers.IntegerField(read_only=True)
     
