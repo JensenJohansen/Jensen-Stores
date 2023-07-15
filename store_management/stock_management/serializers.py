@@ -7,17 +7,34 @@ class GoodsTypeSerializer(serializers.ModelSerializer):
         fields='__all__'
         
 
+
 class StoreSerializer(serializers.ModelSerializer):
+    store_name = serializers.CharField(max_length=150)
+    store_location = serializers.CharField(max_length=150)
+    store_supervisor = serializers.SlugRelatedField(slug_field='username', queryset=get_user_model().objects.all())
+    added_by = serializers.SlugRelatedField(slug_field='username', queryset=get_user_model().objects.all())
+    date_added = serializers.DateTimeField(read_only=True)
+    
     class Meta:
         model=Store
         fields='__all__'
 
 
+class StoreName(serializers.Serializer):
+    def to_representation(self, instance):
+        return instance.store_name
+
 class GoodsSerializer(serializers.ModelSerializer):
     goods_size_details=GoodsTypeSerializer(read_only=True,source='goods_size')
     store_details=StoreSerializer(read_only=True,source='store')
-    goods_size=serializers.PrimaryKeyRelatedField(queryset=GoodsType.objects.all())
-    store=serializers.PrimaryKeyRelatedField(queryset=Store.objects.all())
+    goods_size=serializers.SlugRelatedField(slug_field='goods_type', queryset=GoodsType.objects.all())
+    store= serializers.SlugRelatedField(slug_field='store_name', queryset=Store.objects.all())
+    goods_name = serializers.CharField(max_length=150)
+    goods_number = serializers.CharField(max_length=150)
+    goods_quantity = serializers.IntegerField()
+    lower_price_margin = serializers.IntegerField()
+    added_by = serializers.SlugRelatedField(slug_field='username' ,queryset=get_user_model().objects.all())
+    
     class Meta:
         model=Goods
         fields='__all__'
@@ -25,6 +42,7 @@ class GoodsSerializer(serializers.ModelSerializer):
 
 class UpdateStockSerializer(serializers.ModelSerializer):
     goods=serializers.PrimaryKeyRelatedField(queryset=Goods.objects.all())
+    #updated_by = StoreKeeperSerializer()
     updated_by=serializers.SlugRelatedField(slug_field='username',queryset=get_user_model().objects.all())
     balance=serializers.IntegerField(read_only=True)
     
