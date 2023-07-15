@@ -5,7 +5,6 @@ class GoodsTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model=GoodsType
         fields='__all__'
-        
 
 
 class StoreSerializer(serializers.ModelSerializer):
