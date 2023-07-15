@@ -23,4 +23,6 @@ class OrderRetrieveUpdateDestroyAPIView(RetrieveDestroyAPIView):
     lookup_field='id'
 
 
-
+class GoodsAvailableListAPIView(ListAPIView):
+    queryset = Goods.objects.all()
+    serializer_class = GoodsAvailableForSalesSerializer

@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import *
+from django.db.models import Count,Sum,F,Q
+from datetime import datetime,date
 
 class GoodsTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,9 +20,16 @@ class GoodsSerializer(serializers.ModelSerializer):
     store_details=StoreSerializer(read_only=True,source='store')
     goods_size=serializers.PrimaryKeyRelatedField(queryset=GoodsType.objects.all())
     store=serializers.PrimaryKeyRelatedField(queryset=Store.objects.all())
+    goods_in_pending=serializers.IntegerField(read_only=True)
+    goods_available_for_sales=serializers.IntegerField(read_only=True)
     class Meta:
         model=Goods
         fields='__all__'
+        
+    def to_representation(self, instance):
+        goods_in_pending=Goods.objects.annotate(num_of_goods_pending=Sum(F('goods_ref__goods_quantity'),filter=Q(Q(goods_ref__issued_status=False) | Q(goods_ref__date_added__contains = date.today())))).get(id=instance.id)
+        instance.goods_available_for_sales=instance.goods_quantity-goods_in_pending.num_of_goods_pending
+        return super().to_representation(instance)
     
 
 class UpdateStockSerializer(serializers.ModelSerializer):
@@ -58,3 +67,6 @@ class UpdateStockSerializer(serializers.ModelSerializer):
             raise e
         return updated_goods
     # end def
+    def to_representation(self, instance):
+        instance.balance=instance.quantity_available+instance.quantity_added
+        return super().to_representation(instance)
