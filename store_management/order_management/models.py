@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from stock_management.models import Goods
+from datetime import datetime
 
 class OrderStatus(models.Model):
     '''Model definition for OrderStatus.'''
@@ -35,11 +36,11 @@ class Order(models.Model):
 class GoodsOrder(models.Model):
     '''Model definition for GoodsOrder.'''
     order=models.ForeignKey(Order, verbose_name=_("Order object"),related_name='order_goods', on_delete=models.CASCADE)
-    goods=models.ForeignKey(Goods, verbose_name=_("Goods object"), on_delete=models.DO_NOTHING,blank=True, null=True)
+    goods=models.ForeignKey(Goods, verbose_name=_("Goods object"), on_delete=models.DO_NOTHING,related_query_name="goods_ref",blank=True, null=True)
     goods_quantity=models.IntegerField(_("How many goods is user buying?"))
     price=models.FloatField(_("Price of the goods"))
     issued_status=models.BooleanField(_("Is this item issued?"),default=False)
-
+    date_added=models.DateTimeField(_("Date goods order added"), auto_now=True,blank=True, null=True)
     class Meta:
         '''Meta definition for GoodsOrder.'''
 

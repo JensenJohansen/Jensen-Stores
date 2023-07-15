@@ -40,6 +40,7 @@ class CompanySerializer(serializers.ModelSerializer):
             if company_owner is not None:
                 for own in company_owner:
                     own_role = own.pop('user_groups')
+                    own['username']=own['username'].capitalize()
                     try:
                         owner = AppUser.objects.get(username=own['username'])
                     except AppUser.DoesNotExist:
@@ -83,6 +84,10 @@ class UserSerializer(serializers.ModelSerializer):
     # end def
 
 
+class GroupSerializer(serializers.Serializer):
+    def to_representation(self, instance):
+        return instance.name
+
 class LoginSerializer(serializers.Serializer):
     username=serializers.CharField(max_length=150)
     password=serializers.CharField(style={'input_type':'password'},trim_whitespace=False,write_only=True)
@@ -91,7 +96,7 @@ class LoginSerializer(serializers.Serializer):
     phone_number=serializers.CharField(read_only=True,max_length=150)
     groups = UserGroupField(many=True, read_only=True)
     user_company=CompanySerializer(read_only=True)
-    
+    groups=GroupSerializer(many=True,read_only=True)
     
     def validate(self,attrs):
         username=attrs.get('username')

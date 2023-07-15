@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from .models import *
-from django.db.models import Sum,F
+from django.db.models import Sum,F,Q,Case,When,Value
 
 
 class OrderStatusSerializer(serializers.ModelSerializer):
@@ -10,22 +10,6 @@ class OrderStatusSerializer(serializers.ModelSerializer):
         model=OrderStatus
         fields='__all__'
     
-
-class GoodsOrderReadSerializer(serializers.Serializer):
-    def to_representation(self, instance):
-        """
-        Purpose: get order instance
-        """
-        returned_instance={
-            'id':instance.id,
-            'goods_name':instance.goods.goods_name,
-            'goods_number':instance.goods.goods_number,
-            'goods_quantity':instance.goods_quantity,
-            'price':instance.price,
-            'sum_per_goods':(instance.price*instance.goods_quantity)
-        }
-        return returned_instance
-    # end def
 
 class GoodsOrderReadSerializer(serializers.Serializer):
     def to_representation(self, instance):
@@ -89,3 +73,14 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model=GoodsOrder
         fields='__all__'
+        
+
+class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
+    goods_available_for_sale=serializers.IntegerField(read_only=True)
+    class Meta:
+        model=Goods
+        fields='__all__'
+    def to_representation(self, instance):
+        instance.balance=Goods.objects.annotate(goods_available_for_sale=F('goods_quantity')-
+                                        F()).filter(id=instance.id)
+        return super().to_representation(instance)
