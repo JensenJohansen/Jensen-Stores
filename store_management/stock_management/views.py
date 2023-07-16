@@ -74,6 +74,24 @@ class LeastStockGoodsListAPIView(ListAPIView):
     def get_queryset(self):
         queryset=Goods.objects.filter(goods_quantity__lte=self.kwargs['threshold']).order_by('id')
         return queryset
-    
 
 
+class OrderIssueCreateAPIView(CreateAPIView):
+    QuerySet = Order.objects.all()
+    serializer_class = OrderIssueSerializer
+    permission_classes = [IsAuthenticated,]
+    authentication_classes = [SessionAuthentication, BasicAuthentication,TokenAuthentication]
+
+
+class GoodsOrderIssueListView(ListAPIView):
+    queryset = GoodsOrder.objects.all()
+    serializer_class = GoodsIssueSerializer
+    permission_classes = [IsAuthenticated,]
+    authentication_classes = [SessionAuthentication, BasicAuthentication,TokenAuthentication]
+
+
+class GoodsOrderIssueCreateAPIView(RetrieveUpdateAPIView):
+    queryset = GoodsOrder.objects.all()
+    serializer_class = GoodsIssueSerializer
+    permission_classes = [IsAuthenticated,]
+    authentication_classes = [SessionAuthentication, BasicAuthentication,TokenAuthentication]

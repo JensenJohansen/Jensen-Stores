@@ -6,5 +6,6 @@ urlpatterns = [
     path("create_order_status/<int:id>/", OrderStatusRetrieveUpdateDestroyAPIView.as_view(), name="single_order_status"),
     path("create_order/", OrderListCreateAPIView.as_view(), name="create_order"),
     path("create_order/<int:id>/", OrderRetrieveUpdateDestroyAPIView.as_view(), name="single_order"),
+    path("goods_ordered/", GoodsOrderedListAPIView.as_view(), name="goods-orderd"),
     path("goods_available/", GoodsAvailableListAPIView.as_view(), name="goods_available_for_order"),
 ]

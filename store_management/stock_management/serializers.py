@@ -1,5 +1,8 @@
 from rest_framework import serializers
 from .models import *
+from django.db.models import F, Q,Sum
+from datetime import date
+from order_management.models import Order, GoodsOrder
 
 class GoodsTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -33,23 +36,24 @@ class GoodsSerializer(serializers.ModelSerializer):
     goods_quantity = serializers.IntegerField()
     lower_price_margin = serializers.IntegerField()
     added_by = serializers.SlugRelatedField(slug_field='username' ,queryset=get_user_model().objects.all())
+    goods_in_pending=serializers.IntegerField(read_only=True)
+    goods_available_for_sales=serializers.IntegerField(read_only=True)
     
     class Meta:
         model=Goods
         fields='__all__'
-<<<<<<< Updated upstream
-
-=======
         
     def to_representation(self, instance):
         goods_in_pending=Goods.objects.annotate(
             num_of_goods_pending=Sum(
                 F('goods_ref__goods_quantity'),
                 filter=Q(Q(goods_ref__issued_status=False) | Q(goods_ref__date_added__contains = date.today())))).get(id=instance.id)
+        if not goods_in_pending.num_of_goods_pending:
+            goods_in_pending.num_of_goods_pending = 0 
         instance.goods_available_for_sales=instance.goods_quantity-goods_in_pending.num_of_goods_pending
+        instance.goods_in_pending = goods_in_pending.num_of_goods_pending
         return super().to_representation(instance)
     
->>>>>>> Stashed changes
 
 class UpdateStockSerializer(serializers.ModelSerializer):
     goods=serializers.PrimaryKeyRelatedField(queryset=Goods.objects.all())
@@ -91,4 +95,29 @@ class UpdateStockSerializer(serializers.ModelSerializer):
         instance.balance=instance.quantity_available+instance.quantity_added
         return super().to_representation(instance)
     # end def
+
+
+class OrderIssueSerializer(serializers.Serializer):
+    order_no = serializers.IntegerField(read_only=True)
+    authorizer = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    authorization_status = serializers.CharField(max_length=50, read_only=True)
+    creator = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    issued_status = serializers.BooleanField()
+    order_discount = serializers.FloatField(read_only=True)
     
+    class Meta:
+        model = Order
+        fields = '__all__'
+
+
+class GoodsIssueSerializer(serializers.Serializer):
+    order = serializers.PrimaryKeyRelatedField(read_only=True)
+    goods = serializers.SlugRelatedField(slug_field='goods_name', read_only=True)
+    goods_quantity = serializers.IntegerField(read_only=True)
+    price = serializers.FloatField(read_only=True)
+    issued_status = serializers.BooleanField()
+    issuer = serializers.SlugRelatedField(slug_field='username', queryset=get_user_model().objects.all())
+    
+    class Meta:
+        model = GoodsOrder
+        fields = '__all__'

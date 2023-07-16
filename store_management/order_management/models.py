@@ -19,7 +19,6 @@ class OrderStatus(models.Model):
 class Order(models.Model):
     '''Model definition for Order.'''
     order_no=models.BigAutoField(_("order identification number"),primary_key=True)
-    issuer = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("user who issued an order"),related_name='order_issuer', on_delete=models.DO_NOTHING,blank=True, null=True)
     authorizer=models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("user who authorizes an order"),related_name='order_authorizer', on_delete=models.DO_NOTHING,blank=True, null=True)
     authorization_status=models.ForeignKey(OrderStatus, verbose_name=_("Authorized status"), on_delete=models.SET_NULL,default=1,null=True,blank=True)
     creator=models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("user who creates an order"), on_delete=models.CASCADE)
@@ -31,6 +30,7 @@ class Order(models.Model):
 
         verbose_name = 'Order'
         verbose_name_plural = 'Orders'
+        
 
     
 class GoodsOrder(models.Model):
@@ -40,9 +40,13 @@ class GoodsOrder(models.Model):
     goods_quantity=models.IntegerField(_("How many goods is user buying?"))
     price=models.FloatField(_("Price of the goods"))
     issued_status=models.BooleanField(_("Is this item issued?"),default=False)
+    issuer = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("user who issued an order"),related_name='order_issuer', on_delete=models.DO_NOTHING,blank=True, null=True)
     date_added=models.DateTimeField(_("Date goods order added"), auto_now=True,blank=True, null=True)
     class Meta:
         '''Meta definition for GoodsOrder.'''
 
         verbose_name = 'GoodsOrder'
         verbose_name_plural = 'GoodsOrders'
+    
+    def __str__(self) -> str:
+        return self.goods.goods_name

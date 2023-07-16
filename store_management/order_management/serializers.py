@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from .models import *
 from django.db.models import Sum,F,Q,Case,When,Value
+from datetime import date
 
 
 class OrderStatusSerializer(serializers.ModelSerializer):
@@ -76,11 +77,19 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
         
 
 class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
-    goods_available_for_sale=serializers.IntegerField(read_only=True)
+    goods_in_pending=serializers.IntegerField(read_only=True)
+    goods_available_for_sales=serializers.IntegerField(read_only=True)
     class Meta:
         model=Goods
         fields='__all__'
+        
     def to_representation(self, instance):
-        instance.balance=Goods.objects.annotate(goods_available_for_sale=F('goods_quantity')-
-                                        F()).filter(id=instance.id)
+        goods_in_pending=Goods.objects.annotate(
+            num_of_goods_pending=Sum(
+                F('goods_ref__goods_quantity'),
+                filter=Q(Q(goods_ref__issued_status=False) | Q(goods_ref__date_added__contains = date.today())))).get(id=instance.id)
+        if not goods_in_pending.num_of_goods_pending:
+            goods_in_pending.num_of_goods_pending = 0 
+        instance.goods_available_for_sales=instance.goods_quantity-goods_in_pending.num_of_goods_pending
+        instance.goods_in_pending = goods_in_pending.num_of_goods_pending
         return super().to_representation(instance)
