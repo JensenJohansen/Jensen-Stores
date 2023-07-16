@@ -9,11 +9,14 @@ class OrderStatus(models.Model):
     '''Model definition for OrderStatus.'''
     status=models.CharField(_("Order status"), max_length=50)
     date_added=models.DateTimeField(_("Date a status added"), auto_now=True)
+    
     class Meta:
         '''Meta definition for OrderStatus.'''
-        
         verbose_name = 'OrderStatus'
         verbose_name_plural = 'OrderStatus'
+    
+    def __str__(self):
+        return self.status
 
 
 class Order(models.Model):

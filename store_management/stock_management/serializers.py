@@ -112,6 +112,7 @@ class OrderIssueSerializer(serializers.Serializer):
 
 class GoodsIssueSerializer(serializers.Serializer):
     order = serializers.PrimaryKeyRelatedField(read_only=True)
+    goods_id = serializers.PrimaryKeyRelatedField(read_only=True)
     goods = serializers.SlugRelatedField(slug_field='goods_name', read_only=True)
     goods_quantity = serializers.IntegerField(read_only=True)
     price = serializers.FloatField(read_only=True)
@@ -121,3 +122,22 @@ class GoodsIssueSerializer(serializers.Serializer):
     class Meta:
         model = GoodsOrder
         fields = '__all__'
+        
+    def update(self, instance, validated_data):
+        instance.issued_status = validated_data.get('issued_status', instance.issued_status)
+        instance.issuer = validated_data.get('issuer', instance.issuer)
+        goods = instance.goods_id
+        goods_quantity = instance.goods_quantity
+        
+        try:
+            goods = Goods.objects.get(pk=goods)
+        except:
+            Goods.DoesNotExist
+        
+        try:
+            instance.issuer = get_user_model().objects.get(instance.issuer)
+        except:
+            get_user_model().DoesNotExist
+        instance.save()
+        UpdateStockSerializer(goods.id)
+        return instance
