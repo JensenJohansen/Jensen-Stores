@@ -95,3 +95,4 @@ class GoodsOrderIssueCreateAPIView(RetrieveUpdateAPIView):
     serializer_class = GoodsIssueSerializer
     permission_classes = [IsAuthenticated,]
     authentication_classes = [SessionAuthentication, BasicAuthentication,TokenAuthentication]
+    lookup_field='id'

@@ -47,7 +47,7 @@ class GoodsSerializer(serializers.ModelSerializer):
         goods_in_pending=Goods.objects.annotate(
             num_of_goods_pending=Sum(
                 F('goods_ref__goods_quantity'),
-                filter=Q(Q(goods_ref__issued_status=False) | Q(goods_ref__date_added__contains = date.today())))).get(id=instance.id)
+                filter=Q(Q(goods_ref__issued_status=False) & Q(goods_ref__date_added__contains = date.today())))).get(id=instance.id)
         if not goods_in_pending.num_of_goods_pending:
             goods_in_pending.num_of_goods_pending = 0 
         instance.goods_available_for_sales=instance.goods_quantity-goods_in_pending.num_of_goods_pending
@@ -110,34 +110,21 @@ class OrderIssueSerializer(serializers.Serializer):
         fields = '__all__'
 
 
-class GoodsIssueSerializer(serializers.Serializer):
-    order = serializers.PrimaryKeyRelatedField(read_only=True)
-    goods_id = serializers.PrimaryKeyRelatedField(read_only=True)
-    goods = serializers.SlugRelatedField(slug_field='goods_name', read_only=True)
-    goods_quantity = serializers.IntegerField(read_only=True)
-    price = serializers.FloatField(read_only=True)
-    issued_status = serializers.BooleanField()
+class GoodsIssueSerializer(serializers.ModelSerializer):
     issuer = serializers.SlugRelatedField(slug_field='username', queryset=get_user_model().objects.all())
-    
     class Meta:
         model = GoodsOrder
-        fields = '__all__'
+        fields = ['id','issued_status','issuer','goods']
+        read_only_fields=['goods_quantity',]
         
     def update(self, instance, validated_data):
-        instance.issued_status = validated_data.get('issued_status', instance.issued_status)
         instance.issuer = validated_data.get('issuer', instance.issuer)
-        goods = instance.goods_id
-        goods_quantity = instance.goods_quantity
         
-        try:
-            goods = Goods.objects.get(pk=goods)
-        except:
-            Goods.DoesNotExist
+        if not instance.issued_status:
+            updated_stock = UpdateStockSerializer(data={"updated_by":instance.issuer, "goods":instance.goods.id, "quantity_added":-instance.goods_quantity})
+            if updated_stock.is_valid():
+                updated_stock.save()      
         
-        try:
-            instance.issuer = get_user_model().objects.get(instance.issuer)
-        except:
-            get_user_model().DoesNotExist
+        instance.issued_status = validated_data.get('issued_status', instance.issued_status)
         instance.save()
-        UpdateStockSerializer(goods.id)
         return instance

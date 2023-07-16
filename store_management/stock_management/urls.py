@@ -13,5 +13,5 @@ urlpatterns = [
     path("least_goods_quantity/<int:threshold>/", LeastStockGoodsListAPIView.as_view(), name="least_goods_quantity"),
     path("order_issue/", OrderIssueCreateAPIView.as_view(), name="order-issue"),
     path("order_issue_goods/", GoodsOrderIssueListView.as_view(), name="goods-issue"),
-    path("order_issue_goods/<int:pk>/", GoodsOrderIssueCreateAPIView.as_view(), name="issue")
+    path("order_issue_goods/<int:id>/", GoodsOrderIssueCreateAPIView.as_view(), name="issue")
 ]

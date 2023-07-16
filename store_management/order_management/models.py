@@ -52,4 +52,4 @@ class GoodsOrder(models.Model):
         verbose_name_plural = 'GoodsOrders'
     
     def __str__(self) -> str:
-        return self.goods.goods_name
+        return f'{self.goods.goods_name} for order {self.order}'
