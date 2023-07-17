@@ -3,7 +3,7 @@ from .views import *
 
 urlpatterns = [
     path("goods_type/", GoodsTypeCreateAPIView.as_view(), name="goods_type"),
-    path("goods_type/<int:id>/", GoodsRetrieveUpdateDestroyAPIView.as_view(), name="goods_type_single"),
+    path("goods_type/<int:id>/", GoodsTypeRetrieveUpdateDestroyAPIView.as_view(), name="goods_type_single"),
     path("store/", StoreListCreateAPIView.as_view(), name="store"),
     path("store/<int:id>/", StoreRetrieveUpdateDestroyAPIView.as_view(), name="store_single"),
     path("goods/", GoodsListCreateAPIView.as_view(), name="goods"),

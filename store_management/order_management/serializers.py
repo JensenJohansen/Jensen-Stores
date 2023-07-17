@@ -9,7 +9,6 @@ class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model=OrderStatus
         fields='__all__'
-    
 
 class GoodsOrderReadSerializer(serializers.Serializer):
     def to_representation(self, instance):
@@ -54,9 +53,9 @@ class OrderSerializer(serializers.ModelSerializer):
             GoodsOrder.objects.bulk_create(goods_handler)
         except Exception as e:
             raise (e)
-
         return order
     # end def
+    
     def to_representation(self, instance):
         try:
             order_total=GoodsOrder.objects.filter(order=instance).aggregate(total=Sum(F('price')*F('goods_quantity')))
@@ -69,18 +68,7 @@ class OrderSerializer(serializers.ModelSerializer):
         return super().to_representation(instance)
 
 class GoodsOrderSerializer(serializers.ModelSerializer):
-    order=serializers.PrimaryKeyRelatedField(queryset=Order.objects.all(),many=True)
+    order=serializers.PrimaryKeyRelatedField(queryset=Order.objects.all())
     class Meta:
         model=GoodsOrder
         fields='__all__'
-        
-
-class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
-    goods_available_for_sale=serializers.IntegerField(read_only=True)
-    class Meta:
-        model=Goods
-        fields='__all__'
-    def to_representation(self, instance):
-        instance.balance=Goods.objects.annotate(goods_available_for_sale=F('goods_quantity')-
-                                        F()).filter(id=instance.id)
-        return super().to_representation(instance)

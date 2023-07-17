@@ -44,7 +44,7 @@ class Goods(models.Model):
     goods_name=models.CharField(_("Goods name"), max_length=150)
     goods_number=models.CharField(_("Goods number"), max_length=150)
     goods_quantity=models.IntegerField(_("Goods quantity in number"),validators=[validate_value])
-    goods_size=models.ForeignKey(GoodsType, verbose_name=_("goods type or size"),related_name='size', on_delete=models.DO_NOTHING)
+    goods_type=models.ForeignKey(GoodsType, verbose_name=_("goods type or size"),related_name='goods_and_type', on_delete=models.SET_NULL,blank=True, null=True)
     lower_price_margin=models.FloatField(_("Lowest price of a product"),validators=[validate_value])
     store=models.ForeignKey(Store, verbose_name=_("store goods found"),related_name='store', on_delete=models.DO_NOTHING)
     added_by=models.ForeignKey(get_user_model(), verbose_name=_("User who added goods"), on_delete=models.DO_NOTHING)
