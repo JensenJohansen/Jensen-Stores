@@ -42,7 +42,7 @@ class GoodsOrder(models.Model):
     goods_quantity=models.IntegerField(_("How many goods is user buying?"))
     price=models.FloatField(_("Price of the goods"))
     issued_status=models.BooleanField(_("Is this item issued?"),default=False)
-    issuer=models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("Issuer"), on_delete=models.SET_NULL,blank=True, null=True)
+    issuer = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("user who issued an order"),related_name='order_issuer', on_delete=models.DO_NOTHING,blank=True, null=True)
     date_added=models.DateTimeField(_("Date goods order added"), auto_now=True,blank=True, null=True)
     class Meta:
         '''Meta definition for GoodsOrder.'''

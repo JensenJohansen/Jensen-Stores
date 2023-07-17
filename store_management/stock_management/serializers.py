@@ -120,3 +120,4 @@ class GoodsTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model=GoodsType
         fields='__all__'
+

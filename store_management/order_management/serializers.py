@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from .models import *
 from django.db.models import Sum,F,Q,Case,When,Value
 from datetime import date
+from stock_management.serializers import UpdateStockSerializer
 
 
 class OrderStatusSerializer(serializers.ModelSerializer):
@@ -74,8 +75,36 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
         model=GoodsOrder
         fields='__all__'
         
+    def update(self, instance, validated_data):
+        issued_status = validated_data.get('issued_status')
+        print(issued_status)
+        print(instance.issued_status)
+        instance.issuer = validated_data.get('issuer', instance.issuer)
+        instance.goods_quantity = validated_data.get('goods_quantity', instance.goods_quantity)
+        
+        if instance.issued_status != issued_status:
+            quantity = instance.goods_quantity
+            
+            if issued_status:
+                quantity = -quantity
+            else:
+                quantity = quantity
+            
+            updated_stock = UpdateStockSerializer(
+                data={
+                    "updated_by":instance.issuer, 
+                    "goods":instance.goods.id,
+                    "quantity_added": quantity
+                    }
+                )
+            if updated_stock.is_valid():
+                updated_stock.save()
+            
+        instance.issued_status = issued_status
+        instance.save()
+        return instance
 
-class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
+"""class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
     goods_in_pending=serializers.IntegerField(read_only=True)
     goods_available_for_sales=serializers.IntegerField(read_only=True)
     class Meta:
@@ -91,4 +120,4 @@ class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
             goods_in_pending.num_of_goods_pending = 0 
         instance.goods_available_for_sales=instance.goods_quantity-goods_in_pending.num_of_goods_pending
         instance.goods_in_pending = goods_in_pending.num_of_goods_pending
-        return super().to_representation(instance)
+        return super().to_representation(instance)"""
