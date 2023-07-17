@@ -4,12 +4,6 @@ from django.db.models import F, Q,Sum
 from datetime import date
 from order_management.models import Order, GoodsOrder
 
-class GoodsTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model=GoodsType
-        fields='__all__'
-
-
 class StoreSerializer(serializers.ModelSerializer):
     store_name = serializers.CharField(max_length=150)
     store_location = serializers.CharField(max_length=150)
@@ -21,21 +15,10 @@ class StoreSerializer(serializers.ModelSerializer):
         model=Store
         fields='__all__'
 
-
-class StoreName(serializers.Serializer):
-    def to_representation(self, instance):
-        return instance.store_name
-
 class GoodsSerializer(serializers.ModelSerializer):
-    goods_size_details=GoodsTypeSerializer(read_only=True,source='goods_size')
     store_details=StoreSerializer(read_only=True,source='store')
-    goods_size=serializers.SlugRelatedField(slug_field='goods_type', queryset=GoodsType.objects.all())
-    store= serializers.SlugRelatedField(slug_field='store_name', queryset=Store.objects.all())
-    goods_name = serializers.CharField(max_length=150)
-    goods_number = serializers.CharField(max_length=150)
-    goods_quantity = serializers.IntegerField()
-    lower_price_margin = serializers.IntegerField()
-    added_by = serializers.SlugRelatedField(slug_field='username' ,queryset=get_user_model().objects.all())
+    goods_type=serializers.SlugRelatedField(slug_field='goods_type',queryset=GoodsType.objects.all())
+    store=serializers.SlugRelatedField(slug_field='store_name',queryset=Store.objects.all())
     goods_in_pending=serializers.IntegerField(read_only=True)
     goods_available_for_sales=serializers.IntegerField(read_only=True)
     
@@ -44,16 +27,17 @@ class GoodsSerializer(serializers.ModelSerializer):
         fields='__all__'
         
     def to_representation(self, instance):
-        goods_in_pending=Goods.objects.annotate(
-            num_of_goods_pending=Sum(
-                F('goods_ref__goods_quantity'),
-                filter=Q(Q(goods_ref__issued_status=False) & Q(goods_ref__date_added__contains = date.today())))).get(id=instance.id)
-        if not goods_in_pending.num_of_goods_pending:
-            goods_in_pending.num_of_goods_pending = 0 
+        try:
+            goods_in_pending=Goods.objects.annotate(
+                num_of_goods_pending=Sum(F('goods_ref__goods_quantity'),filter=Q(Q(goods_ref__issued_status=False) 
+                                                                                & Q(goods_ref__date_added__contains = date.today())))).get(id=instance.id)
+            if not goods_in_pending.num_of_goods_pending:
+                goods_in_pending.num_of_goods_pending=0
+        except Exception as e:
+            raise(e)
         instance.goods_available_for_sales=instance.goods_quantity-goods_in_pending.num_of_goods_pending
         instance.goods_in_pending = goods_in_pending.num_of_goods_pending
         return super().to_representation(instance)
-    
 
 class UpdateStockSerializer(serializers.ModelSerializer):
     goods=serializers.PrimaryKeyRelatedField(queryset=Goods.objects.all())
@@ -89,6 +73,8 @@ class UpdateStockSerializer(serializers.ModelSerializer):
             goods.save()
         except Exception as e:
             raise e
+        
+        
         return updated_goods
     
     def to_representation(self, instance):
@@ -128,3 +114,9 @@ class GoodsIssueSerializer(serializers.ModelSerializer):
         instance.issued_status = validated_data.get('issued_status', instance.issued_status)
         instance.save()
         return instance
+
+class GoodsTypeSerializer(serializers.ModelSerializer):
+    goods_and_type=GoodsSerializer(many=True,read_only=True)
+    class Meta:
+        model=GoodsType
+        fields='__all__'

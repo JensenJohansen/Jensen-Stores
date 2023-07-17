@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated,AllowAny
 from django.db.models import F
 from .serializers import *
 
-class GoodsTypeCreateAPIView(CreateAPIView):
+class GoodsTypeCreateAPIView(ListCreateAPIView):
     queryset = GoodsType.objects.all().order_by('id')
     serializer_class = GoodsTypeSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication,TokenAuthentication]
@@ -39,7 +39,7 @@ class GoodsListCreateAPIView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
 
-class GoodsRetrieveUpdateDestroyAPIView(RetrieveDestroyAPIView):
+class GoodsRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Goods.objects.all().order_by('id')
     serializer_class = GoodsSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication,TokenAuthentication]
@@ -68,6 +68,8 @@ class GoodsUpdateListAPIView(ListAPIView):
     
 
 class LeastStockGoodsListAPIView(ListAPIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication,TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     serializer_class = GoodsSerializer
     lookup_field='goods_quantity'
     
