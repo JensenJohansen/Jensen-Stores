@@ -39,7 +39,7 @@ class GoodsListCreateAPIView(ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
 
-class GoodsRetrieveUpdateDestroyAPIView(RetrieveDestroyAPIView):
+class GoodsRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Goods.objects.all().order_by('id')
     serializer_class = GoodsSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication,TokenAuthentication]
