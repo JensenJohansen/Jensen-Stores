@@ -83,13 +83,7 @@ class UpdateStockSerializer(serializers.ModelSerializer):
 
 
 class OrderIssueSerializer(serializers.Serializer):
-    order_no = serializers.IntegerField(read_only=True)
-    authorizer = serializers.SlugRelatedField(slug_field='username', read_only=True)
-    authorization_status = serializers.CharField(max_length=50, read_only=True)
-    creator = serializers.SlugRelatedField(slug_field='username', read_only=True)
     issued_status = serializers.BooleanField()
-    order_discount = serializers.FloatField(read_only=True)
-    
     class Meta:
         model = Order
         fields = '__all__'

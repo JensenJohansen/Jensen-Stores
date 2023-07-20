@@ -7,7 +7,6 @@ from stock_management.serializers import UpdateStockSerializer
 
 
 class OrderStatusSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model=OrderStatus
         fields='__all__'
@@ -74,11 +73,9 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model=GoodsOrder
         fields='__all__'
-        
+    
     def update(self, instance, validated_data):
         issued_status = validated_data.get('issued_status')
-        print(issued_status)
-        print(instance.issued_status)
         instance.issuer = validated_data.get('issuer', instance.issuer)
         instance.goods_quantity = validated_data.get('goods_quantity', instance.goods_quantity)
         
