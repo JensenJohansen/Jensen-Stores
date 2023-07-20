@@ -2,9 +2,10 @@ from django.shortcuts import render
 from rest_framework.generics import *
 from knox.auth import TokenAuthentication
 from rest_framework.authentication import BasicAuthentication,SessionAuthentication
-from rest_framework.permissions import IsAuthenticated,AllowAny
+from rest_framework.permissions import IsAuthenticated,AllowAny, IsAuthenticatedOrReadOnly
 from django.db.models import F
 from .serializers import *
+from .permissions import *
 
 class GoodsTypeCreateAPIView(ListCreateAPIView):
     queryset = GoodsType.objects.all().order_by('id')
@@ -36,7 +37,10 @@ class GoodsListCreateAPIView(ListCreateAPIView):
     queryset = Goods.objects.all().order_by('id')
     serializer_class = GoodsSerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication,TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,IsShopKeeper]
+    
+    def perform_create(self, serializer):
+        return serializer.save(added_by=self.request.user)
 
 
 class GoodsRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
@@ -98,3 +102,13 @@ class GoodsOrderIssueCreateAPIView(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated,]
     authentication_classes = [SessionAuthentication, BasicAuthentication,TokenAuthentication]
     lookup_field='id'
+
+
+class TestView(ListCreateAPIView):
+    queryset = Goods.objects.all()
+    serializer_class = GoodsSerializer
+    permission_classes = [IsAuthenticated,IsShopKeeper]
+    authentication_classes = (BasicAuthentication,)
+    
+    def perform_create(self, serializer):
+        return serializer.save(added_by=self.request.user)

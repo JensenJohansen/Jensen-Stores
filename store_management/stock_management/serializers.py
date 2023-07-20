@@ -19,13 +19,12 @@ class GoodsSerializer(serializers.ModelSerializer):
     store_details=StoreSerializer(read_only=True,source='store')
     goods_type=serializers.SlugRelatedField(slug_field='goods_type',queryset=GoodsType.objects.all())
     store=serializers.SlugRelatedField(slug_field='store_name',queryset=Store.objects.all())
-    goods_in_pending=serializers.IntegerField(read_only=True)
-    goods_available_for_sales=serializers.IntegerField(read_only=True)
+    added_by = serializers.PrimaryKeyRelatedField(read_only=True,)
     
     class Meta:
         model=Goods
         fields='__all__'
-        
+    
     def to_representation(self, instance):
         try:
             goods_in_pending=Goods.objects.annotate(
@@ -120,4 +119,3 @@ class GoodsTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model=GoodsType
         fields='__all__'
-
