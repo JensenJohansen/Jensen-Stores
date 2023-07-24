@@ -95,7 +95,7 @@ class GoodsIssueSerializer(serializers.ModelSerializer):
         model = GoodsOrder
         fields = ['id','issued_status','issuer','goods']
         read_only_fields=['goods_quantity',]
-        
+    
     def update(self, instance, validated_data):
         instance.issuer = validated_data.get('issuer', instance.issuer)
         

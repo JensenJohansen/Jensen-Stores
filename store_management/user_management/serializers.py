@@ -2,7 +2,7 @@ from django.contrib.auth.models import Group
 from django.db.models import Q, F
 from rest_framework import serializers
 from .models import Company, AppUser
-from django.contrib.auth import authenticate,login
+from django.contrib.auth import authenticate, login, models, get_user_model
 
 
 class CompanyUserListingField(serializers.Serializer):
@@ -96,7 +96,6 @@ class LoginSerializer(serializers.Serializer):
     phone_number=serializers.CharField(read_only=True,max_length=150)
     groups = UserGroupField(many=True, read_only=True)
     user_company=CompanySerializer(read_only=True)
-    groups=GroupSerializer(many=True,read_only=True)
     
     def validate(self,attrs):
         username=attrs.get('username')

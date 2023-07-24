@@ -4,8 +4,8 @@ from django.contrib.auth.models import Group
 
 class IsShopOwner(permissions.BasePermission):
     def has_permission(self, request, view):
-        user_group = Group.objects.values('name').get(user=request.user.id)
-        user_group = user_group['name']
+        user_group = Group.objects.get(user=request.user.id)
+        user_group = user_group.name
         
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -17,8 +17,8 @@ class IsShopOwner(permissions.BasePermission):
 
 class IsCashier(permissions.BasePermission):
     def has_permission(self, request, view):
-        user_group = Group.objects.values('name').get(user=request.user.id)
-        user_group = user_group['name']
+        user_group = Group.objects.get(user=request.user.id)
+        user_group = user_group.name
         
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -30,8 +30,8 @@ class IsCashier(permissions.BasePermission):
 
 class IsShopKeeper(permissions.BasePermission):
     def has_permission(self, request, view):
-        user_group = Group.objects.values('name').get(user=request.user.id)
-        user_group = user_group['name']
+        user_group = Group.objects.get(user=request.user.id)
+        user_group = user_group.name
         
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -43,8 +43,8 @@ class IsShopKeeper(permissions.BasePermission):
 
 class IsSalesPerson(permissions.BasePermission):
     def has_permission(self, request, view):
-        user_group = Group.objects.values('name').get(user=request.user.id)
-        user_group = user_group['name']
+        user_group = Group.objects.get(user=request.user.id)
+        user_group = user_group.name
         
         if request.method in permissions.SAFE_METHODS:
             return True
