@@ -43,8 +43,9 @@ class OrderSerializer(serializers.ModelSerializer):
         Purpose: Create Order
         """
         order_goods=validated_data.pop('order_goods')
+        caption = validated_data.pop('order_caption')
         creator=get_user_model().objects.get(id=validated_data['creator'].id)
-        order=Order.objects.create(creator=creator)
+        order=Order.objects.create(creator=creator, order_caption=caption)
         try:
             goods_handler=[]
             for o_goods in order_goods:
