@@ -5,7 +5,6 @@ from django.db.models import Sum,F,Q,Case,When,Value
 from datetime import date
 from stock_management.serializers import UpdateStockSerializer
 
-
 class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model=OrderStatus

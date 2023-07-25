@@ -40,7 +40,7 @@ class GoodsListCreateAPIView(ListCreateAPIView):
     queryset = Goods.objects.all().order_by('-id')
     serializer_class = GoodsSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
-    permission_classes = [IsAuthenticated, IsShopKeeper]
+    permission_classes = [IsAuthenticated, IsShopOwner]
     
     def perform_create(self, serializer):
         return serializer.save(added_by=self.request.user)

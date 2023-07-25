@@ -3,6 +3,8 @@ from .models import *
 from django.db.models import F, Q,Sum
 from datetime import date
 from order_management.models import Order, GoodsOrder
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
 
 class StoreSerializer(serializers.ModelSerializer):
     store_name = serializers.CharField(max_length=150)
@@ -17,26 +19,42 @@ class StoreSerializer(serializers.ModelSerializer):
 
 class GoodsSerializer(serializers.ModelSerializer):
     store_details=StoreSerializer(read_only=True,source='store')
-    goods_type=serializers.SlugRelatedField(slug_field='goods_type',queryset=GoodsType.objects.all())
-    store=serializers.SlugRelatedField(slug_field='store_name',queryset=Store.objects.all())
+    goods_type=serializers.SlugRelatedField(slug_field='goods_type', read_only=True)
+    store=serializers.SlugRelatedField(slug_field='store_name', read_only=True)
     added_by = serializers.PrimaryKeyRelatedField(read_only=True,)
+    goods = serializers.JSONField(write_only=True)
     
     class Meta:
         model=Goods
         fields='__all__'
+        read_only_fields=['goods_name', 'goods_number', 'goods_quantity', 'lower_price_margin']
     
-    def to_representation(self, instance):
-        try:
-            goods_in_pending=Goods.objects.annotate(
-                num_of_goods_pending=Sum(F('goods_ref__goods_quantity'),filter=Q(Q(goods_ref__issued_status=False) 
-                                                                                & Q(goods_ref__date_added__contains = date.today())))).get(id=instance.id)
-            if not goods_in_pending.num_of_goods_pending:
-                goods_in_pending.num_of_goods_pending=0
-        except Exception as e:
-            raise(e)
-        instance.goods_available_for_sales=instance.goods_quantity-goods_in_pending.num_of_goods_pending
-        instance.goods_in_pending = goods_in_pending.num_of_goods_pending
-        return super().to_representation(instance)
+    def create(self, validated_data):
+        goods = validated_data.pop('goods')
+        added_by = validated_data['added_by']
+        items = []
+        for item in goods:
+            goods_type = item.pop('goods_type')
+            store = item.pop('store')
+            try:
+                goods_type = GoodsType.objects.get(goods_type=goods_type)
+            except Exception as e:
+                raise(e)
+            try: 
+                store = get_object_or_404(Store, store_name=store)
+            except Exception as e:
+                raise(e)
+            
+            item = Goods(
+                goods_type=goods_type,
+                store=store,
+                added_by=added_by,
+                **item
+                )
+            items.append(item)
+        created_items = Goods.objects.bulk_create(items)
+        print(created_items)
+        return created_items
 
 class UpdateStockSerializer(serializers.ModelSerializer):
     goods=serializers.PrimaryKeyRelatedField(queryset=Goods.objects.all())
