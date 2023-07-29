@@ -43,7 +43,8 @@ class OrderSerializer(serializers.ModelSerializer):
         """
         order_goods=validated_data.pop('order_goods')
         caption = validated_data.pop('order_caption')
-        creator=get_user_model().objects.get(id=validated_data['creator'].id)
+        creator = validated_data['creator']
+        #creator=get_user_model().objects.get(id=validated_data['creator'].id)
         order=Order.objects.create(creator=creator, order_caption=caption)
         try:
             goods_handler=[]
@@ -55,7 +56,16 @@ class OrderSerializer(serializers.ModelSerializer):
         except Exception as e:
             raise (e)
         return order
-    # end def
+    
+    def update(self, instance, validated_data):
+        discount = validated_data.get('order_discount', instance.order_discount)
+        status = validated_data.get("authorization_status", instance.authorization_status)
+        
+        if status:
+            pass       
+        
+        instance.save()
+        return instance
     
     def to_representation(self, instance):
         try:

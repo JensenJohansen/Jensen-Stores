@@ -89,6 +89,7 @@ class GroupSerializer(serializers.Serializer):
         return instance.name
 
 class LoginSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
     username=serializers.CharField(max_length=150)
     password=serializers.CharField(style={'input_type':'password'},trim_whitespace=False,write_only=True)
     first_name=serializers.CharField(read_only=True,max_length=150)

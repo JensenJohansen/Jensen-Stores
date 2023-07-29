@@ -41,9 +41,6 @@ class GoodsListCreateAPIView(ListCreateAPIView):
     serializer_class = GoodsSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
     permission_classes = [IsAuthenticated, IsShopOwner]
-    
-    def perform_create(self, serializer):
-        return serializer.save(added_by=self.request.user)
 
 
 class GoodsRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):

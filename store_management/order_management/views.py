@@ -34,7 +34,7 @@ class OrderRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
-    permission_classes = [IsAuthenticated, IsSalesPerson]
+    permission_classes = [IsAuthenticated]
     lookup_field='order_no'
 
 
