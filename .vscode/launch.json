@@ -12,7 +12,7 @@
             "program": "${workspaceFolder}/store_management/manage.py",
             "args": [
                 "runserver",
-                "127.0.0.1:8001"
+                "192.168.8.100:8000"
             ],
             "django": true,
             "justMyCode": true

@@ -69,7 +69,7 @@ class CompanyRetrieveUpdateDestroyAPIView(RetrieveDestroyAPIView):
 class AppUserCreateAPIView(CreateAPIView):
     queryset = AppUser.objects.all()
     serializer_class = UserSerializer
-    authentication_classes = [SessionAuthentication, BasicAuthentication,TokenAuthentication]
+    authentication_classes = [BasicAuthentication,TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):

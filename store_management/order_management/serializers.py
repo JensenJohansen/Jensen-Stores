@@ -43,7 +43,7 @@ class OrderSerializer(serializers.ModelSerializer):
         """
         order_goods=validated_data.pop('order_goods')
         creator=get_user_model().objects.get(id=validated_data['creator'].id)
-        order=Order.objects.create(creator=creator)
+        order=Order.objects.create(creator=creator,order_caption=validated_data['order_caption'])
         try:
             goods_handler=[]
             for o_goods in order_goods:
@@ -62,7 +62,7 @@ class OrderSerializer(serializers.ModelSerializer):
             if order_total['total'] is not None:
                 order_total=order_total['total']-instance.order_discount
                 instance.total_order_amount={'order_total':order_total,
-                                        'VAT':self.payable_vat_calc(order_total=order_total)}
+                                        'VAT':round(self.payable_vat_calc(order_total=order_total),2)}
         except Exception as error:
             raise error
         return super().to_representation(instance)
