@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from user_management.models import Company
 
 def validate_value(value):
     if value <= 0:
@@ -28,6 +29,7 @@ class GoodsType(models.Model):
 class Store(models.Model):
     '''Model definition for Store.'''
     store_name=models.CharField(_("Store name"), max_length=150)
+    company = models.ForeignKey(Company, verbose_name=_("store company"), related_name=_('store_company'), on_delete=models.DO_NOTHING, blank=True, null=True)
     store_location=models.CharField(_("Store location"), max_length=150)
     store_supervisor=models.ForeignKey(get_user_model(), verbose_name=_("store supervisor"),related_name='store_keeper', on_delete=models.SET_NULL,blank=True, null=True)
     added_by=models.ForeignKey(get_user_model(), verbose_name=_("User who added store"),related_name='store_adder', on_delete=models.DO_NOTHING,blank=True, null=True)

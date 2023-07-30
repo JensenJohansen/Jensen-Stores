@@ -3,19 +3,47 @@ from .models import *
 from django.db.models import F, Q,Sum
 from datetime import date
 from order_management.models import Order, GoodsOrder
+from user_management.models import Company
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 
 class StoreSerializer(serializers.ModelSerializer):
-    store_name = serializers.CharField(max_length=150)
-    store_location = serializers.CharField(max_length=150)
-    store_supervisor = serializers.SlugRelatedField(slug_field='username', queryset=get_user_model().objects.all())
-    added_by = serializers.SlugRelatedField(slug_field='username', queryset=get_user_model().objects.all())
+    store_name = serializers.CharField(max_length=150, read_only=True)
+    company = serializers.SlugRelatedField(slug_field='company_name', read_only=True)
+    store_location = serializers.CharField(max_length=150, read_only=True)
+    store_supervisor = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    added_by = serializers.SlugRelatedField(slug_field='username', read_only=True)
     date_added = serializers.DateTimeField(read_only=True)
+    store = serializers.JSONField(write_only=True)
     
     class Meta:
         model=Store
         fields='__all__'
+    
+    def create(self, validated_data):
+        #store_name = validated_data['store_name']
+        #store_location = validated_data['store_location']
+        print(validated_data)
+        
+        added_by = validated_data['added_by']
+        validated_data = validated_data['store']
+        company = validated_data.pop('company')
+        store_supervisor = validated_data.pop('store_supervisor')
+        print(added_by)
+        try:
+            supervisor = get_user_model().objects.get(username=store_supervisor.title())
+        except:
+            raise get_user_model().DoesNotExist
+        
+        try:
+            company = Company.objects.get(company_name=company)
+        except:
+            raise Company.DoesNotExist
+        
+        store = Store(store_supervisor=supervisor, company=company, added_by=added_by, **validated_data)
+        store.save()
+        return store
+
 
 class GoodsSerializer(serializers.ModelSerializer):
     store_details=StoreSerializer(read_only=True,source='store')
@@ -32,7 +60,6 @@ class GoodsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         goods = validated_data.pop('goods')
         added_by = validated_data['added_by']
-        print(added_by)
         items = []
         for item in goods:
             goods_type = item.pop('goods_type')

@@ -44,7 +44,7 @@ class LogoutView(KnoxLogoutView):
 
 
 class CompanyCreateAPIView(ListCreateAPIView):
-    queryset = Company.objects.all()
+    queryset = Company.objects.all().order_by('-id')
     serializer_class = CompanySerializer
     authentication_classes = [BasicAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]

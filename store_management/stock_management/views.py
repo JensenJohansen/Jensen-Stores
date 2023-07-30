@@ -27,6 +27,9 @@ class StoreListCreateAPIView(ListCreateAPIView):
     serializer_class = StoreSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
     permission_classes = [IsAuthenticated, IsShopOwner]
+    
+    def perform_create(self, serializer):
+        return serializer.save(added_by=self.request.user)
 
 class StoreRetrieveUpdateDestroyAPIView(RetrieveDestroyAPIView):
     queryset = Store.objects.all().order_by('id')
