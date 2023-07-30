@@ -90,8 +90,6 @@ class UpdateStockSerializer(serializers.ModelSerializer):
             goods.save()
         except Exception as e:
             raise e
-        
-        
         return updated_goods
     
     def to_representation(self, instance):

@@ -73,7 +73,7 @@ class OrderSerializer(serializers.ModelSerializer):
             if order_total['total'] is not None:
                 order_total=order_total['total']-instance.order_discount
                 instance.total_order_amount={'order_total':order_total,
-                                        'VAT':self.payable_vat_calc(order_total=order_total)}
+                                        'VAT':round(self.payable_vat_calc(order_total=order_total),2)}
         except Exception as error:
             raise error
         return super().to_representation(instance)

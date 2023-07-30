@@ -28,6 +28,7 @@ class Order(models.Model):
     creator=models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("user who creates an order"), on_delete=models.CASCADE)
     issued_status=models.BooleanField(_("Has the order been issued?"), default=False)
     order_discount=models.FloatField(_("Discount given to a user"),default=0.00)
+    order_caption=models.TextField(_("Short description about the order"),blank=True, null=True)
     date_added=models.DateTimeField(_("Date an order created"), auto_now=True)
     class Meta:
         '''Meta definition for Order.'''

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.generics import *
 from .serializers import *
 from knox.auth import TokenAuthentication
-from rest_framework.authentication import BasicAuthentication,SessionAuthentication
+from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from stock_management.permissions import *
 from .permissions import *

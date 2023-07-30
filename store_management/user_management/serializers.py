@@ -86,7 +86,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 class GroupSerializer(serializers.Serializer):
     def to_representation(self, instance):
-        return instance.name
+        instance=Group.objects.values('name').get(id=instance.id)
+        return instance
 
 class LoginSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -108,7 +109,7 @@ class LoginSerializer(serializers.Serializer):
         if not AppUser.objects.filter(username=username).exists():
             raise serializers.ValidationError('User does not exist')
         user=authenticate(request=self.context.get('request'),username=username,password=password)
-            
+        
         if not user:
             raise serializers.ValidationError('Wrong credentials')
         attrs['user']=user
