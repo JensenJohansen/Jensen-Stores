@@ -40,13 +40,13 @@ class CompanySerializer(serializers.ModelSerializer):
             if company_owner is not None:
                 for own in company_owner:
                     own_role = own.pop('user_groups')
-                    own['username']=own['username'].capitalize()
+                    own['username']=own['username'].title()
                     try:
                         owner = AppUser.objects.get(username=own['username'])
                     except AppUser.DoesNotExist:
                         owner = AppUser.objects.create_user(user_company=company, **own)
                     for role in own_role:
-                        role = Group.objects.get(name=role) #removing .title to match queries
+                        role = Group.objects.get(name=role.title())
                         owner.groups.add(role)
             return company
     # end def
@@ -100,7 +100,7 @@ class LoginSerializer(serializers.Serializer):
     user_company=CompanySerializer(read_only=True)
     
     def validate(self,attrs):
-        username=attrs.get('username')
+        username=attrs.get('username').title()
         password =attrs.get('password')
         
         if not username or not password:

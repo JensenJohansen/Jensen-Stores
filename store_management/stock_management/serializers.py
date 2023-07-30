@@ -32,6 +32,7 @@ class GoodsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         goods = validated_data.pop('goods')
         added_by = validated_data['added_by']
+        print(added_by)
         items = []
         for item in goods:
             goods_type = item.pop('goods_type')
@@ -53,7 +54,6 @@ class GoodsSerializer(serializers.ModelSerializer):
                 )
             items.append(item)
         created_items = Goods.objects.bulk_create(items)
-        print(created_items)
         return created_items
 
 class UpdateStockSerializer(serializers.ModelSerializer):
