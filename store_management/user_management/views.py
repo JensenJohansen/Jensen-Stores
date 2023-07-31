@@ -58,7 +58,7 @@ class CompanyCreateAPIView(ListCreateAPIView):
             return Response(status=HTTP_304_NOT_MODIFIED)
 
 
-class CompanyRetrieveUpdateDestroyAPIView(RetrieveDestroyAPIView):
+class CompanyRetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     authentication_classes = [SessionAuthentication, BasicAuthentication]
@@ -79,3 +79,10 @@ class AppUserCreateAPIView(CreateAPIView):
             return Response(data=user.data, status=HTTP_201_CREATED)
         else:
             return Response(status=HTTP_304_NOT_MODIFIED)
+
+class AppUserRetrieveEditView(RetrieveUpdateAPIView):
+    queryset = AppUser.objects.all()
+    serializer_class = UserSerializer
+    authentication_classes = [TokenAuthentication,]
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'

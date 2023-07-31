@@ -42,5 +42,5 @@ class GoodsOrderUpdateAPIView(RetrieveUpdateAPIView):
     queryset=GoodsOrder.objects.all()
     serializer_class=GoodsOrderSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
-    permission_classes = [IsAuthenticated, IsSalesPerson, IsPaidOrEditable]
+    permission_classes = [IsAuthenticated, IsShopKeeper, IsPaidOrEditable]
     lookup_field='id'
