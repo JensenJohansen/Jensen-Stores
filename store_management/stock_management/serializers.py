@@ -21,10 +21,6 @@ class StoreSerializer(serializers.ModelSerializer):
         fields='__all__'
     
     def create(self, validated_data):
-        #store_name = validated_data['store_name']
-        #store_location = validated_data['store_location']
-        print(validated_data)
-        
         added_by = validated_data['added_by']
         validated_data = validated_data['store']
         company = validated_data.pop('company')
