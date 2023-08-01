@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .serializers import *
+from .permissions import *
 from rest_framework.generics import *
 from knox.views import LoginView as KnoxLoginView
 from knox.views import LogoutView as KnoxLogoutView
@@ -70,7 +71,7 @@ class AppUserCreateAPIView(CreateAPIView):
     queryset = AppUser.objects.all()
     serializer_class = UserSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsShopOwner]
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=self.request.data)
@@ -80,9 +81,18 @@ class AppUserCreateAPIView(CreateAPIView):
         else:
             return Response(status=HTTP_304_NOT_MODIFIED)
 
+
 class AppUserRetrieveEditView(RetrieveUpdateAPIView):
     queryset = AppUser.objects.all()
     serializer_class = UserSerializer
+    authentication_classes = [TokenAuthentication,]
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'
+
+
+class ChangePasswordAPIView(RetrieveUpdateAPIView):
+    queryset = AppUser.objects.all()
+    serializer_class = ChangePasswordSerializer
     authentication_classes = [TokenAuthentication,]
     permission_classes = [IsAuthenticated]
     lookup_field = 'id'

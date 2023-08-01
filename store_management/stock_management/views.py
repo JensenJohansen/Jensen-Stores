@@ -5,7 +5,7 @@ from rest_framework.authentication import BasicAuthentication,SessionAuthenticat
 from rest_framework.permissions import IsAuthenticated,AllowAny, IsAuthenticatedOrReadOnly
 from django.db.models import F
 from .serializers import *
-from .permissions import *
+from user_management.permissions import *
 
 class GoodsTypeCreateAPIView(ListCreateAPIView):
     queryset = GoodsType.objects.all().order_by('-id')

@@ -9,5 +9,6 @@ urlpatterns = [
         path("company/", CompanyCreateAPIView.as_view(), name="company"),
         path("company/<int:id>/", CompanyRetrieveUpdateDestroyAPIView.as_view(), name="company_single"),
         path("user_registration/", AppUserCreateAPIView.as_view(), name="user_registration"),
-        path("user_edit/<int:id>/", AppUserRetrieveEditView.as_view(), name="user_edit"),
+        path("user_profile/<int:id>/", AppUserRetrieveEditView.as_view(), name="user_profile"),
+        path("change_password/<int:id>/", ChangePasswordAPIView.as_view(), name="change_password")
     ]

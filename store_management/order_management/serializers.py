@@ -79,14 +79,17 @@ class OrderSerializer(serializers.ModelSerializer):
         return super().to_representation(instance)
 
 class GoodsOrderSerializer(serializers.ModelSerializer):
-    order=serializers.PrimaryKeyRelatedField(queryset=Order.objects.all())
+    order=serializers.PrimaryKeyRelatedField(read_only=True)
+    goods_issue = serializers.JSONField(write_only=True, allow_null=True)
     class Meta:
         model=GoodsOrder
         fields='__all__'
+        read_only_fields = ['goods_quantity', 'price', 'issued_status', 'goods', 'issuer']
     
     def update(self, instance, validated_data):
-        issued_status = validated_data.get('issued_status')
         instance.issuer = validated_data.get('issuer', instance.issuer)
+        validated_data = validated_data['goods_issue']
+        issued_status = validated_data.get('issued_status')
         instance.goods_quantity = validated_data.get('goods_quantity', instance.goods_quantity)
         
         if instance.issued_status != issued_status:
