@@ -28,6 +28,9 @@ class OrderListCreateAPIView(ListCreateAPIView):
     serializer_class = OrderSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
     permission_classes = [IsAuthenticated, IsSalesPerson]
+    
+    def perform_create(self, serializer):
+        return serializer.save(creator=self.request.user)
 
 
 class OrderRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):

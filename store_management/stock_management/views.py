@@ -11,10 +11,10 @@ class GoodsTypeCreateAPIView(ListCreateAPIView):
     queryset = GoodsType.objects.all().order_by('-id')
     serializer_class = GoodsTypeSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
-    permission_classes = [IsAuthenticated, IsShopKeeper]
+    permission_classes = [IsAuthenticated, IsShopOwner]
 
 
-class GoodsTypeRetrieveUpdateDestroyAPIView(RetrieveDestroyAPIView):
+class GoodsTypeRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = GoodsType.objects.all().order_by('id')
     serializer_class = GoodsTypeSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
@@ -31,8 +31,8 @@ class StoreListCreateAPIView(ListCreateAPIView):
     def perform_create(self, serializer):
         return serializer.save(added_by=self.request.user)
 
-class StoreRetrieveUpdateDestroyAPIView(RetrieveDestroyAPIView):
-    queryset = Store.objects.all().order_by('id')
+class StoreRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = Store.objects.all().order_by('-id')
     serializer_class = StoreSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
     permission_classes = [IsAuthenticated, IsShopOwner]
@@ -62,6 +62,9 @@ class UpdateStockListCreateAPIView(ListCreateAPIView):
     serializer_class = UpdateStockSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
     permission_classes = [IsAuthenticated, IsShopKeeper]
+
+    def perform_create(self, serializer):
+        return serializer.save(updated_by=self.request.user)
 
 
 class GoodsUpdateListAPIView(ListAPIView):

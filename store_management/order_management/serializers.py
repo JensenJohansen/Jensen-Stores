@@ -21,21 +21,43 @@ class GoodsOrderReadSerializer(serializers.Serializer):
             'goods_number':instance.goods.goods_number,
             'goods_quantity':instance.goods_quantity,
             'price':instance.price,
+            'issued_status': instance.issued_status,
             'sum_per_goods':(instance.price*instance.goods_quantity)
         }
         return returned_instance
     # end def
 
 class OrderSerializer(serializers.ModelSerializer):
-    order_goods_details=GoodsOrderReadSerializer(many=True,read_only=True,source='order_goods')
+    order_goods_details=GoodsOrderReadSerializer(many=True,source='order_goods', read_only=True)
     order_goods=serializers.JSONField(write_only=True)
     total_order_amount = serializers.JSONField(read_only=True)
+    creator = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    order_discount = serializers.JSONField(write_only=True, allow_null=True)
+    authorization_status = serializers.SlugRelatedField(slug_field='status', queryset=OrderStatus.objects.all(), allow_null=True)
     class Meta:
         model=Order
         fields='__all__'
         
     def payable_vat_calc(self,order_total:float):
         return (order_total*(18/118))
+    
+    def validate(self, attrs):
+        orders = attrs['order_goods']
+        attrs['order_goods'] = []
+        for order in orders:
+            goods = order.get('goods')
+            ordered_quantity = order.get('goods_quantity')
+            price = order.get('price')
+            item = Goods.objects.get(id=goods)
+            if ordered_quantity < item.goods_quantity:
+                attrs['order_goods'].append(order)
+            else:
+                raise serializers.ValidationError("Goods_quantity: you entered more orders than the quantity available")
+            
+            if price < item.lower_price_margin:
+                raise serializers.ValidationError("Price: Please consider lower price margin")
+            
+        return attrs
     
     def create(self, validated_data):
         """
@@ -44,7 +66,6 @@ class OrderSerializer(serializers.ModelSerializer):
         order_goods=validated_data.pop('order_goods')
         caption = validated_data.pop('order_caption')
         creator = validated_data['creator']
-        #creator=get_user_model().objects.get(id=validated_data['creator'].id)
         order=Order.objects.create(creator=creator, order_caption=caption)
         try:
             goods_handler=[]
@@ -58,11 +79,16 @@ class OrderSerializer(serializers.ModelSerializer):
         return order
     
     def update(self, instance, validated_data):
-        discount = validated_data.get('order_discount', instance.order_discount)
-        status = validated_data.get("authorization_status", instance.authorization_status)
-        
-        if status:
-            pass       
+        print(instance.authorization_status)
+        print(vars(instance))
+        print(validated_data)
+        if instance.authorization_status != "paid":
+            instance.authorization_status = validated_data.get("authorization_status", instance.authorization_status)
+            
+            for item in validated_data["order_goods"]:
+                print(item)
+                goodsorder = item.get("id")
+                quantity = item.get("goods_quantity")
         
         instance.save()
         return instance
@@ -102,15 +128,18 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
             
             updated_stock = UpdateStockSerializer(
                 data={
-                    "updated_by":instance.issuer, 
-                    "goods":instance.goods.id,
-                    "quantity_added": quantity
+                    "update":{
+                        "updated_by":instance.issuer, 
+                        "goods":instance.goods.id,
+                        "quantity_added": quantity
+                        }
                     }
                 )
             if updated_stock.is_valid():
                 updated_stock.save()
             
-        instance.issued_status = issued_status
+            instance.issued_status = issued_status
+            
         instance.save()
         return instance
 

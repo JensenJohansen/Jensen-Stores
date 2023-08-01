@@ -6,6 +6,7 @@ from order_management.models import Order, GoodsOrder
 from user_management.models import Company
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from rest_framework import status
 
 class StoreSerializer(serializers.ModelSerializer):
     store_name = serializers.CharField(max_length=150, read_only=True)
@@ -25,7 +26,6 @@ class StoreSerializer(serializers.ModelSerializer):
         validated_data = validated_data['store']
         company = validated_data.pop('company')
         store_supervisor = validated_data.pop('store_supervisor')
-        print(added_by)
         try:
             supervisor = get_user_model().objects.get(username=store_supervisor.title())
         except:
@@ -36,16 +36,26 @@ class StoreSerializer(serializers.ModelSerializer):
         except:
             raise Company.DoesNotExist
         
+        if Store.objects.filter(store_name=validated_data['store_name']).exists():
+            raise serializers.ValidationError({"store_name": "store name already in use by another store"})
+        
         store = Store(store_supervisor=supervisor, company=company, added_by=added_by, **validated_data)
         store.save()
         return store
+    
+    def update(self, instance, validated_data):
+        validated_data = validated_data['store']
+        instance.store_name = validated_data.get('store_name', instance.store_name)
+        instance.store_location = validated_data.get("store_location", instance.store_location)
+        instance.save()
+        return instance
 
 
 class GoodsSerializer(serializers.ModelSerializer):
     store_details=StoreSerializer(read_only=True,source='store')
     goods_type=serializers.SlugRelatedField(slug_field='goods_type', read_only=True)
     store=serializers.SlugRelatedField(slug_field='store_name', read_only=True)
-    added_by = serializers.PrimaryKeyRelatedField(read_only=True,)
+    added_by = serializers.SlugRelatedField(slug_field="username", read_only=True,)
     goods = serializers.JSONField(write_only=True)
     
     class Meta:
@@ -80,44 +90,56 @@ class GoodsSerializer(serializers.ModelSerializer):
         return created_items
 
 class UpdateStockSerializer(serializers.ModelSerializer):
-    goods=serializers.PrimaryKeyRelatedField(queryset=Goods.objects.all())
-    updated_by=serializers.SlugRelatedField(slug_field='username',queryset=get_user_model().objects.all())
+    goods=serializers.PrimaryKeyRelatedField(read_only=True)
+    updated_by=serializers.SlugRelatedField(slug_field='username', read_only=True)
     balance=serializers.IntegerField(read_only=True)
+    update = serializers.JSONField(write_only=True)
     
     class Meta:
         model=GoodsUpdate
         fields= '__all__'
-        read_only_fields=('quantity_available',)
-
+        read_only_fields=('quantity_available', 'quantity_added',)
+        
+    
+    
+    """def to_representation(self, instance):
+        if isinstance(instance, list):
+            return instance
+        instance.balance=instance.quantity_available+instance.quantity_added
+        return instance"""
+    
     def create(self, validated_data):
         """
         Purpose: update stock adds a goods or issue stock
         """
         user=validated_data.pop('updated_by')
-        goods=validated_data.pop('goods')
+        validated_data = validated_data['update']
         
-        try:
-            user=get_user_model().objects.get(username=user)
-        except:
-            raise get_user_model().DoesNotExist
-        
-        try:
-            goods=Goods.objects.get(id=goods.id)
-            quantity_available=goods.goods_quantity
-        except:
-            raise Goods.DoesNotExist
-        try:
-            updated_goods=GoodsUpdate.objects.create(**validated_data,goods=goods,updated_by=user,
-                                            quantity_available=quantity_available)
-            goods.goods_quantity=quantity_available+validated_data['quantity_added']
-            goods.save()
-        except Exception as e:
-            raise e
-        return updated_goods
+        goods_update = []
+        for item in validated_data:
+            goods=item.pop('goods')
+            
+            try:
+                goods=Goods.objects.get(id=goods)
+                quantity_available=goods.goods_quantity
+            except Goods.DoesNotExist:
+                raise serializers.ValidationError({"goods":"goods you entered Does not Exist"})
+            try:
+                updated_goods=GoodsUpdate(
+                    **item,
+                    goods=goods,
+                    updated_by=user,
+                    quantity_available=quantity_available
+                    )
+                goods.goods_quantity=quantity_available+item['quantity_added']
+                goods.save()
+                goods_update.append(updated_goods)
+            except Exception as e:
+                raise e
+        goods_update = GoodsUpdate.objects.bulk_create(goods_update)
+        return goods_update
     
-    def to_representation(self, instance):
-        instance.balance=instance.quantity_available+instance.quantity_added
-        return super().to_representation(instance)
+    
     # end def
 
 
