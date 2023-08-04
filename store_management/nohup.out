@@ -381,3 +381,30 @@ Not Found: /*
 [2023-08-04 13:54:47 +0000] [49278] [ERROR] Worker (pid:49279) exited with code 1
 [2023-08-04 13:54:47 +0000] [49278] [ERROR] Worker (pid:49279) exited with code 1.
 [2023-08-04 13:54:47 +0000] [49848] [INFO] Booting worker with pid: 49848
+[2023-08-04 14:24:27 +0000] [49278] [INFO] Handling signal: term
+[2023-08-04 17:24:27 +0300] [49848] [INFO] Worker exiting (pid: 49848)
+[2023-08-04 14:24:27 +0000] [49278] [INFO] Shutting down: Master
+[2023-08-04 14:24:44 +0000] [50319] [INFO] Starting gunicorn 21.2.0
+[2023-08-04 14:24:44 +0000] [50319] [INFO] Listening at: http://0.0.0.0:8000 (50319)
+[2023-08-04 14:24:44 +0000] [50319] [INFO] Using worker: sync
+[2023-08-04 14:24:44 +0000] [50321] [INFO] Booting worker with pid: 50321
+Not Found: /
+Not Found: /
+Not Found: /*
+[2023-08-04 15:58:10 +0000] [50319] [INFO] Handling signal: term
+[2023-08-04 18:58:10 +0300] [50321] [INFO] Worker exiting (pid: 50321)
+[2023-08-04 15:58:10 +0000] [50319] [INFO] Shutting down: Master
+[2023-08-04 15:58:26 +0000] [51344] [INFO] Starting gunicorn 21.2.0
+[2023-08-04 15:58:26 +0000] [51344] [INFO] Listening at: http://0.0.0.0:8000 (51344)
+[2023-08-04 15:58:26 +0000] [51344] [INFO] Using worker: sync
+[2023-08-04 15:58:26 +0000] [51345] [INFO] Booting worker with pid: 51345
+[2023-08-04 16:00:25 +0000] [51344] [INFO] Handling signal: term
+[2023-08-04 19:00:25 +0300] [51345] [INFO] Worker exiting (pid: 51345)
+[2023-08-04 16:00:25 +0000] [51344] [INFO] Shutting down: Master
+[2023-08-04 16:03:10 +0000] [51413] [INFO] Starting gunicorn 21.2.0
+[2023-08-04 16:03:10 +0000] [51413] [INFO] Listening at: http://0.0.0.0:8000 (51413)
+[2023-08-04 16:03:10 +0000] [51413] [INFO] Using worker: sync
+[2023-08-04 16:03:10 +0000] [51414] [INFO] Booting worker with pid: 51414
+[2023-08-04 16:19:28 +0000] [51413] [INFO] Handling signal: term
+[2023-08-04 19:19:28 +0300] [51414] [INFO] Worker exiting (pid: 51414)
+[2023-08-04 16:19:28 +0000] [51413] [INFO] Shutting down: Master
