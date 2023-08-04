@@ -95,7 +95,6 @@ class UserSerializer(serializers.ModelSerializer):
         
         if user_group is not None:
             for userrole in user_group:
-                print(userrole.title())
                 group = Group.objects.get(name=userrole.title())
                 user.groups.add(group)
         
