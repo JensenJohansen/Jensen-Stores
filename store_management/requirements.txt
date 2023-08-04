@@ -7,7 +7,6 @@ django-filter==23.2
 django-rest-knox==4.2.0
 djangorestframework==3.14.0
 greenlet==2.0.2
-psycopg2==2.9.6
 pycparser==2.21
 pytz==2023.3
 SQLAlchemy==2.0.12
