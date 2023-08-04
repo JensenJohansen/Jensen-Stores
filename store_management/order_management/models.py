@@ -24,7 +24,7 @@ class Order(models.Model):
     order_no=models.BigAutoField(_("order identification number"),primary_key=True)
     order_caption = models.CharField(_("Order Caption"), max_length=50, null=True, blank=True)
     authorizer=models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("user who authorizes an order"),related_name='order_authorizer', on_delete=models.DO_NOTHING,blank=True, null=True)
-    authorization_status=models.ForeignKey(OrderStatus, verbose_name=_("Authorized status"), on_delete=models.SET_NULL,default=1,null=True,blank=True)
+    authorization_status=models.ForeignKey(OrderStatus, verbose_name=_("Authorized status"), on_delete=models.SET_NULL,null=True,blank=True)
     creator=models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("user who creates an order"), on_delete=models.CASCADE)
     issued_status=models.BooleanField(_("Has the order been issued?"), default=False)
     order_discount=models.FloatField(_("Discount given to a user"),default=0.00)

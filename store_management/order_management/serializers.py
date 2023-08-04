@@ -43,6 +43,9 @@ class OrderSerializer(serializers.ModelSerializer):
     
     def validate(self, attrs):
         orders = attrs['order_goods']
+        if not orders:
+            raise serializers.ValidationError("Order_goods: Sure you fill the required values inorder to create order")
+        
         attrs['order_goods'] = []
         for order in orders:
             goods = order.get('goods')
@@ -79,9 +82,6 @@ class OrderSerializer(serializers.ModelSerializer):
         return order
     
     def update(self, instance, validated_data):
-        print(instance.authorization_status)
-        print(vars(instance))
-        print(validated_data)
         if instance.authorization_status != "paid":
             instance.authorization_status = validated_data.get("authorization_status", instance.authorization_status)
             
