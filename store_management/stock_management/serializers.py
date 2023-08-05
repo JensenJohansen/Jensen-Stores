@@ -91,9 +91,10 @@ class GoodsSerializer(serializers.ModelSerializer):
 
 class UpdateStockSerializer(serializers.ModelSerializer):
     goods=serializers.PrimaryKeyRelatedField(read_only=True)
-    updated_by=serializers.SlugRelatedField(slug_field='username', queryset=get_user_model().objects.all())
+    updated_by=serializers.SlugRelatedField(slug_field='username', read_only=True)
     balance=serializers.IntegerField(read_only=True)
     update = serializers.JSONField(write_only=True)
+    #updater = serializers.JSONField(write_only=True, required=False)
     
     class Meta:
         model=GoodsUpdate
@@ -112,7 +113,7 @@ class UpdateStockSerializer(serializers.ModelSerializer):
         """
         Purpose: update stock adds a goods or issue stock
         """
-        user=validated_data.pop('updated_by')
+        user=validated_data.pop('updater')
         validated_data = validated_data['update']
         
         goods_update = []
@@ -128,7 +129,7 @@ class UpdateStockSerializer(serializers.ModelSerializer):
                 updated_goods=GoodsUpdate(
                     **item,
                     goods=goods,
-                    updated_by=user,
+                    updated_by=get_user_model().objects.get(username=user),
                     quantity_available=quantity_available
                     )
                 goods.goods_quantity=quantity_available+item['quantity_added']

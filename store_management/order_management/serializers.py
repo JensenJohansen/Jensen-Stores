@@ -133,14 +133,13 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
                         "goods":instance.goods.id,
                         "quantity_added": quantity
                         }
-                        ],
-                    "updated_by": instance.issuer.username
+                        ]
                     }
                 )
             
             
             if updated_stock.is_valid(raise_exception=True):
-                updated_stock.save()
+                updated_stock.save(updater=instance.issuer.username)
             
             instance.issued_status = issued_status
             
