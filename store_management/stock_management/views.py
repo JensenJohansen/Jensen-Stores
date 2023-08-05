@@ -64,7 +64,7 @@ class UpdateStockListCreateAPIView(ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsShopKeeper]
 
     def perform_create(self, serializer):
-        return serializer.save(updated_by=self.request.user)
+        return serializer.save(updated_by=self.request.user.username)
 
 
 class GoodsUpdateListAPIView(ListAPIView):
