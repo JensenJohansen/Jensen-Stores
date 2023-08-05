@@ -94,7 +94,6 @@ class UpdateStockSerializer(serializers.ModelSerializer):
     updated_by=serializers.SlugRelatedField(slug_field='username', read_only=True)
     balance=serializers.IntegerField(read_only=True)
     update = serializers.JSONField(write_only=True)
-    #updater = serializers.JSONField(write_only=True, required=False)
     
     class Meta:
         model=GoodsUpdate

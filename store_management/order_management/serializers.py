@@ -4,7 +4,6 @@ from .models import *
 from django.db.models import Sum,F,Q,Case,When,Value
 from datetime import date
 from stock_management.serializers import UpdateStockSerializer
-import json
 
 class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
