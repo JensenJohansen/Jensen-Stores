@@ -4,6 +4,7 @@ from .models import *
 from django.db.models import Sum,F,Q,Case,When,Value
 from datetime import date
 from stock_management.serializers import UpdateStockSerializer
+import json
 
 class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
@@ -86,7 +87,6 @@ class OrderSerializer(serializers.ModelSerializer):
             instance.authorization_status = validated_data.get("authorization_status", instance.authorization_status)
             
             for item in validated_data["order_goods"]:
-                print(item)
                 goodsorder = item.get("id")
                 quantity = item.get("goods_quantity")
         
@@ -128,14 +128,18 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
             
             updated_stock = UpdateStockSerializer(
                 data={
-                    "update":{
-                        "updated_by":instance.issuer, 
+                    "update": [
+                        {
                         "goods":instance.goods.id,
                         "quantity_added": quantity
                         }
+                        ],
+                    "updated_by": instance.issuer.username
                     }
                 )
-            if updated_stock.is_valid():
+            
+            
+            if updated_stock.is_valid(raise_exception=True):
                 updated_stock.save()
             
             instance.issued_status = issued_status

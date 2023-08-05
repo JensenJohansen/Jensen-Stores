@@ -91,7 +91,7 @@ class GoodsSerializer(serializers.ModelSerializer):
 
 class UpdateStockSerializer(serializers.ModelSerializer):
     goods=serializers.PrimaryKeyRelatedField(read_only=True)
-    updated_by=serializers.SlugRelatedField(slug_field='username', read_only=True)
+    updated_by=serializers.SlugRelatedField(slug_field='username', queryset=get_user_model().objects.all())
     balance=serializers.IntegerField(read_only=True)
     update = serializers.JSONField(write_only=True)
     
