@@ -43,7 +43,13 @@ class LogoutView(KnoxLogoutView):
     permission_classes=[IsAuthenticated]
 
 
-
+class SubscriptionListView(ListCreateAPIView):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+    authentication_classes = [BasicAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    
 class CompanyCreateAPIView(ListCreateAPIView):
     queryset = Company.objects.all().order_by('-id')
     serializer_class = CompanySerializer
@@ -57,6 +63,23 @@ class CompanyCreateAPIView(ListCreateAPIView):
             return Response(data=serializer.data, status=HTTP_201_CREATED)
         else:
             return Response(status=HTTP_304_NOT_MODIFIED)
+    
+    def get_serializer_context(self, id):
+        subscription = Subscription.objects.values("type").filter(company=id)
+        return subscription
+    
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = CompanySerializer(queryset, many=True)
+        #serializer.is_valid(raise_exception=True)
+        serialized_data = serializer.data
+        
+        for company in serialized_data:
+            sub = self.get_serializer_context(company["id"])
+            if sub.exists():
+                company['subscriptions'] = sub[0]["type"]
+        
+        return Response({'serialized_data':serialized_data})
 
 
 class CompanyRetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView):
@@ -67,7 +90,7 @@ class CompanyRetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView):
     lookup_field = 'id'
 
 
-class AppUserCreateAPIView(CreateAPIView):
+class AppUserCreateAPIView(ListCreateAPIView):
     queryset = AppUser.objects.all()
     serializer_class = UserSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
@@ -76,7 +99,7 @@ class AppUserCreateAPIView(CreateAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=self.request.data)
         if serializer.is_valid(raise_exception=True):
-            user = self.serializer_class(serializer.save(validated_data=self.request.data))
+            user = self.serializer_class(serializer.save())
             return Response(data=user.data, status=HTTP_201_CREATED)
         else:
             return Response(status=HTTP_304_NOT_MODIFIED)

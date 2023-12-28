@@ -1,9 +1,10 @@
 from django.contrib.auth.models import Group
 from django.db.models import Q, F
 from rest_framework import serializers
-from .models import Company, AppUser
+from .models import Company, AppUser, Subscription
 from django.contrib.auth import authenticate, login, models, get_user_model
 from rest_framework.response import Response
+import datetime
 
 
 class CompanyUserListingField(serializers.Serializer):
@@ -21,85 +22,104 @@ class UserGroupField(serializers.Serializer):
         groups = Group.objects.values('name').get(id=instance.id)
         return groups
 
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = '__all__'
+
+
 class CompanySerializer(serializers.ModelSerializer):
-    user_company = CompanyUserListingField(many=True, read_only=True)
-    owner=serializers.JSONField(write_only=True, allow_null=True)
-    company = serializers.JSONField(write_only=True, allow_null=True)
+    owner = serializers.JSONField(write_only=True, required=False)
     class Meta:
         model = Company
         fields = '__all__'
-        read_only_fields = ["company_name", "company_location", "company_tin"]
-
+    
+    def validate(self, attrs):
+        owner = attrs.get("owner")
+        username = owner["username"]
+        print(username)
+        
+        if AppUser.objects.filter(username=username.title()).exists():
+            raise serializers.ValidationError("the username already exist, try another username")
+        
+        if Company.objects.filter(company_name=attrs['company_name']).exists():
+            raise serializers.ValidationError('the company name already exist')
+        return attrs
+    
     def create(self, validated_data):
         """
-        Purpose: Create a Company Profile
+        A method to create company along with creating subscription and company owner for the
+        first time.
         """
-        company_owner = validated_data.pop('owner')
-        validated_data = validated_data['company']
+        owner = validated_data.pop("owner")
+        owner['user_groups'] = ["shopowner"]
+        company = Company.objects.create(**validated_data)
+        owner['user_company'] = company
         
-        if Company.objects.filter(**validated_data).exists():
-            raise serializers.ValidationError("This Company already exists")
+        #creating a free 7days subscription for the company
+        today = datetime.date.today()
+        free_days = today + datetime.timedelta(days=7)
+        sub = SubscriptionSerializer(
+            data={
+                "type": "STANDARD", 
+                "date_activated":today, 
+                "expire_date":free_days,
+                "company": company.pk
+                }
+            )
+        if sub.is_valid():
+            sub.save()
         else:
-            company=Company.objects.create(**validated_data)
-            return company
-    # end def
-    
-    def update(self, instance, validated_data):
-        company = instance.id
-        validated_data = validated_data['owner']
-        group = validated_data.pop('user_groups')
-        username = validated_data.pop('username')
-        for item in group:
-            try:
-                group = Group.objects.get(name=item.title())
-            except Group.DoesNotExist:
-                raise serializers.ValidationError("you choose the uknown group")
+            return sub.errors
         
-        try:
-            staff = AppUser.objects.get(username=username.title())
-        except AppUser.DoesNotExist:
-            staff = AppUser.objects.create_user(username=username.title(), user_company=instance, **validated_data)
-        
-        staff.groups.add(group)
-        return Response(data=staff)
-
+        #Creating user who is shopowner for the company
+        shop_owner = UserSerializer(data=owner)
+        if shop_owner.is_valid():
+            shop_owner.save()
+        else:
+            return shop_owner.errors
+        return company
 
 
 class UserSerializer(serializers.ModelSerializer):
-    company_owners = CompanySerializer(many=True, read_only=True)
-    user = serializers.JSONField(write_only=True, allow_null=True)
-    password = serializers.CharField(write_only=True, min_length=8)
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField(max_length=150)
+    first_name = serializers.CharField(max_length=150)
+    last_name = serializers.CharField(max_length=150)
+    phone_number = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    user_company = serializers.SlugRelatedField(queryset=Company.objects.all(),slug_field="company_name")
+    groups = serializers.StringRelatedField(many=True, read_only=True)
+    user_groups = serializers.JSONField(write_only=True)
+    password = serializers.CharField(
+        style={'input_type':'password'},
+        write_only=True
+    )
 
     class Meta:
         model = AppUser
-        fields = '__all__'
-        read_only_fields = ["username", "first_name", "last_name", "phone_number"]
+        fields = ["id","username", "first_name", "last_name", "phone_number", "email", 
+                    "user_company", "groups", "password", "user_groups"]
     
     def create(self, validated_data):
-        """
-        Purpose: Method registers data
-        """
-        password = validated_data['password']
-        validated_data = validated_data['user']
-        user_group = validated_data.pop('user_groups')
-        user_company = validated_data.pop('company')
-        try:
-            user_company = Company.objects.get(company_name=user_company)
-        except Company.DoesNotExist:
-            user_company = None
+        user_group = validated_data.pop("user_groups")
+        password = validated_data.pop('password')
+        username = validated_data.pop('username').title()
         
-        if AppUser.objects.filter(username=validated_data['username'].title()).exists():
+        if AppUser.objects.filter(username=username.title()).exists():
             raise serializers.ValidationError({"username": "User with similar username Exist"})
         
-        user = AppUser.objects.create_user(user_company=user_company, password=password, **validated_data)
-        
+        user = AppUser.objects.create_user(username=username, password=password, **validated_data)
         if user_group is not None:
             for userrole in user_group:
-                group = Group.objects.get(name=userrole.title())
+                try:
+                    group = Group.objects.get(name=userrole.lower())
+                except Group.DoesNotExist():
+                    raise serializers.ValidationError("you provide the unknown group")
                 user.groups.add(group)
-        
         return user
-    # end def
+    
     
     def update(self, instance, validated_data):
         validated_data = validated_data['user']
