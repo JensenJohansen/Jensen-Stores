@@ -27,13 +27,13 @@ class GoodsOrderReadSerializer(serializers.Serializer):
         return returned_instance
     # end def
 
+
 class OrderSerializer(serializers.ModelSerializer):
     order_goods_details=GoodsOrderReadSerializer(many=True,source='order_goods', read_only=True)
     order_goods=serializers.JSONField(write_only=True)
     total_order_amount = serializers.JSONField(read_only=True)
     creator = serializers.SlugRelatedField(slug_field='username', read_only=True)
-    order_discount = serializers.JSONField(write_only=True, allow_null=True)
-    authorization_status = serializers.SlugRelatedField(slug_field='status', queryset=OrderStatus.objects.all(), allow_null=True)
+    authorization_status = serializers.SlugRelatedField(slug_field='status', read_only=True)
     class Meta:
         model=Order
         fields='__all__'

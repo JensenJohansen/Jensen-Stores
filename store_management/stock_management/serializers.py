@@ -138,9 +138,6 @@ class UpdateStockSerializer(serializers.ModelSerializer):
                 raise e
         goods_update = GoodsUpdate.objects.bulk_create(goods_update)
         return goods_update
-    
-    
-    # end def
 
 
 class OrderIssueSerializer(serializers.Serializer):

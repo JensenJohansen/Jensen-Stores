@@ -30,6 +30,7 @@ class OrderListCreateAPIView(ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsSalesPerson]
     
     def perform_create(self, serializer):
+        pending = OrderStatus.objects.get(status="pending")
         return serializer.save(creator=self.request.user)
 
 
