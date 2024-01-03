@@ -38,7 +38,6 @@ class CompanySerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         owner = attrs.get("owner")
         username = owner["username"]
-        print(username)
         
         if AppUser.objects.filter(username=username.title()).exists():
             raise serializers.ValidationError("the username already exist, try another username")

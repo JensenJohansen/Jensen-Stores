@@ -54,7 +54,7 @@ class CompanyCreateAPIView(ListCreateAPIView):
     queryset = Company.objects.all().order_by('-id')
     serializer_class = CompanySerializer
     authentication_classes = [BasicAuthentication, TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=self.request.data)
@@ -103,6 +103,15 @@ class AppUserCreateAPIView(ListCreateAPIView):
             return Response(data=user.data, status=HTTP_201_CREATED)
         else:
             return Response(status=HTTP_304_NOT_MODIFIED)
+    
+    def get(self, request, *args, **kwargs):
+        user_company = request.user.user_company
+        filtered_data =  self.get_queryset().filter(user_company=user_company)
+        serializer = self.serializer_class(filtered_data, many=True)
+        serialized_data = serializer.data
+        return Response(data=serialized_data,status=HTTP_200_OK)
+    
+    
 
 
 class AppUserRetrieveEditView(RetrieveUpdateAPIView):
