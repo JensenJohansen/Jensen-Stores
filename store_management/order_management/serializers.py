@@ -30,10 +30,10 @@ class GoodsOrderReadSerializer(serializers.Serializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     order_goods_details=GoodsOrderReadSerializer(many=True,source='order_goods', read_only=True)
-    order_goods=serializers.JSONField(write_only=True)
+    order_goods=serializers.JSONField(write_only=True, required=False)
     total_order_amount = serializers.JSONField(read_only=True)
     creator = serializers.SlugRelatedField(slug_field='username', read_only=True)
-    authorization_status = serializers.SlugRelatedField(slug_field='status', read_only=True)
+    authorization_status = serializers.SlugRelatedField(slug_field='status', queryset=OrderStatus.objects.all())
     class Meta:
         model=Order
         fields='__all__'
@@ -42,9 +42,11 @@ class OrderSerializer(serializers.ModelSerializer):
         return (order_total*(18/118))
     
     def validate(self, attrs):
-        orders = attrs['order_goods']
-        if not orders:
-            raise serializers.ValidationError("Order_goods: Sure you fill the required values inorder to create order")
+        try:
+            orders = attrs['order_goods']
+        except:
+            orders = []
+        
         
         attrs['order_goods'] = []
         for order in orders:
@@ -68,8 +70,18 @@ class OrderSerializer(serializers.ModelSerializer):
         """
         order_goods=validated_data.pop('order_goods')
         caption = validated_data.pop('order_caption')
+        order_discount = validated_data.pop('order_discount')
         creator = validated_data['creator']
-        order=Order.objects.create(creator=creator, order_caption=caption)
+        if order_discount:
+            pass
+        else:
+            order_discount=0.00
+            
+        order=Order.objects.create(
+            creator=creator, 
+            order_caption=caption,
+            order_discount=order_discount
+            )
         try:
             goods_handler=[]
             for o_goods in order_goods:
@@ -82,13 +94,19 @@ class OrderSerializer(serializers.ModelSerializer):
         return order
     
     def update(self, instance, validated_data):
+        """
+        purpose: Editing order, especially adding new goods and authorization status
+        """
+        print(instance.authorization_status)
+        print(validated_data.get("authorization_status"))
         if instance.authorization_status != "paid":
             instance.authorization_status = validated_data.get("authorization_status", instance.authorization_status)
             
-            for item in validated_data["order_goods"]:
-                goodsorder = item.get("id")
-                quantity = item.get("goods_quantity")
-        
+            if validated_data["order_goods"]:
+                for item in validated_data["order_goods"]:
+                    goodsorder = item.get("id")
+                    quantity = item.get("goods_quantity")
+            
         instance.save()
         return instance
     

@@ -9,6 +9,9 @@ from rest_framework.response import Response
 from rest_framework import status
 
 class StoreSerializer(serializers.ModelSerializer):
+    """
+    A Serializer to handle store operations inluding adding and editing store
+    """
     store_name = serializers.CharField(max_length=150, read_only=True)
     company = serializers.SlugRelatedField(slug_field='company_name', read_only=True)
     store_location = serializers.CharField(max_length=150, read_only=True)
@@ -52,6 +55,9 @@ class StoreSerializer(serializers.ModelSerializer):
 
 
 class GoodsSerializer(serializers.ModelSerializer):
+    """
+    A serializer for adding goods to the specific store for the first time
+    """
     store_details=StoreSerializer(read_only=True,source='store')
     goods_type=serializers.SlugRelatedField(slug_field='goods_type', read_only=True)
     store=serializers.SlugRelatedField(slug_field='store_name', read_only=True)
@@ -90,6 +96,9 @@ class GoodsSerializer(serializers.ModelSerializer):
         return created_items
 
 class UpdateStockSerializer(serializers.ModelSerializer):
+    """
+    A serializer for updating stock(goods) when issuing or adding new stock
+    """
     goods=serializers.PrimaryKeyRelatedField(read_only=True)
     updated_by=serializers.SlugRelatedField(slug_field='username', read_only=True)
     balance=serializers.IntegerField(read_only=True)
@@ -100,8 +109,6 @@ class UpdateStockSerializer(serializers.ModelSerializer):
         fields= '__all__'
         read_only_fields=('quantity_available', 'quantity_added',)
         
-    
-    
     """def to_representation(self, instance):
         if isinstance(instance, list):
             return instance
@@ -165,6 +172,7 @@ class GoodsIssueSerializer(serializers.ModelSerializer):
         instance.issued_status = validated_data.get('issued_status', instance.issued_status)
         instance.save()
         return instance
+
 
 class GoodsTypeSerializer(serializers.ModelSerializer):
     goods_and_type=GoodsSerializer(many=True,read_only=True)

@@ -106,13 +106,12 @@ class AppUserCreateAPIView(ListCreateAPIView):
     
     def get(self, request, *args, **kwargs):
         user_company = request.user.user_company
+        print(user_company)
         filtered_data =  self.get_queryset().filter(user_company=user_company)
         serializer = self.serializer_class(filtered_data, many=True)
         serialized_data = serializer.data
         return Response(data=serialized_data,status=HTTP_200_OK)
     
-    
-
 
 class AppUserRetrieveEditView(RetrieveUpdateAPIView):
     queryset = AppUser.objects.all()

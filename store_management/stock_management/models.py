@@ -16,6 +16,7 @@ class GoodsType(models.Model):
     '''Model definition for GoodsType.'''
     goods_type=models.CharField(_("Goods type"), max_length=150, unique=True)
     date_added=models.DateTimeField(_("Date goods type added"), auto_now=True)
+    company = models.ForeignKey(Company, verbose_name=_("goodstype company"), on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         '''Meta definition for GoodsType.'''
