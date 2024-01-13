@@ -40,6 +40,11 @@ class OrderRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [BasicAuthentication,TokenAuthentication]
     permission_classes = [IsAuthenticated]
     lookup_field='order_no'
+    
+    def perform_update(self, serializer):
+        user_group = Group.objects.get(appuser=self.request.user.id)  
+        print(user_group.name)
+        return serializer.save()
 
 
 class GoodsOrderUpdateAPIView(RetrieveUpdateAPIView):

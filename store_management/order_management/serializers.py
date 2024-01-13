@@ -97,16 +97,27 @@ class OrderSerializer(serializers.ModelSerializer):
         """
         purpose: Editing order, especially adding new goods and authorization status
         """
-        print(instance.authorization_status)
-        print(validated_data.get("authorization_status"))
+        order = instance.order_no
         if instance.authorization_status != "paid":
-            instance.authorization_status = validated_data.get("authorization_status", instance.authorization_status)
-            
             if validated_data["order_goods"]:
+                order_goods_details = instance.order_goods
                 for item in validated_data["order_goods"]:
-                    goodsorder = item.get("id")
-                    quantity = item.get("goods_quantity")
-            
+                    goods = item.get("goods")
+                    try:
+                        match = order_goods_details.get(goods_id=goods)
+                        match.price = item.get("price", match.price)
+                        match.goods_quantity = item.get("goods_quantity", match.goods_quantity)
+                        match.save()
+                    except:
+                        good = get_object_or_404(Goods, id=goods)
+                        updated_goods = GoodsOrder(
+                            order=instance,
+                            goods=good,
+                            goods_quantity=item.get("goods_quantity"),
+                            price=item.get("price"),
+                        )
+                        updated_goods.save()
+            instance.authorization_status = validated_data.get("authorization_status", instance.authorization_status) 
         instance.save()
         return instance
     
@@ -133,9 +144,9 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
         instance.issuer = validated_data.get('issuer', instance.issuer)
         validated_data = validated_data['goods_issue']
         issued_status = validated_data.get('issued_status')
-        instance.goods_quantity = validated_data.get('goods_quantity', instance.goods_quantity)
         
         if instance.issued_status != issued_status:
+            instance.goods_quantity = validated_data.get('goods_quantity', instance.goods_quantity)
             quantity = instance.goods_quantity
             
             if issued_status:
@@ -159,6 +170,10 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
                 updated_stock.save(updater=instance.issuer.username)
             
             instance.issued_status = issued_status
+        
+        if not instance.issued_status:
+            instance.price = validated_data.get("price", instance.price)
+            instance.goods_quantity = validated_data.get("goods_quantity", instance.goods_quantity)
             
         instance.save()
         return instance
