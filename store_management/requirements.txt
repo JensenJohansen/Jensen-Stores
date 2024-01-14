@@ -2,11 +2,13 @@ asgiref==3.6.0
 cffi==1.15.1
 cryptography==41.0.1
 Django==4.2.1
+django-cors-headers==4.3.1
 django-environ==0.10.0
 django-filter==23.2
 django-rest-knox==4.2.0
 djangorestframework==3.14.0
 greenlet==2.0.2
+psycopg2-binary==2.9.9
 pycparser==2.21
 pytz==2023.3
 SQLAlchemy==2.0.12

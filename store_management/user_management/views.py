@@ -112,7 +112,7 @@ class AppUserCreateAPIView(ListCreateAPIView):
         return Response(data=serialized_data,status=HTTP_200_OK)
     
 
-class AppUserRetrieveEditView(RetrieveUpdateAPIView):
+class AppUserRetrieveEditView(RetrieveUpdateDestroyAPIView):
     queryset = AppUser.objects.all()
     serializer_class = UserSerializer
     authentication_classes = [TokenAuthentication,]
