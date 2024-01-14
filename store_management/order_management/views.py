@@ -47,7 +47,7 @@ class OrderRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         return serializer.save()
 
 
-class GoodsOrderUpdateAPIView(RetrieveUpdateAPIView):
+class GoodsOrderUpdateAPIView(RetrieveUpdateDestroyAPIView):
     queryset=GoodsOrder.objects.all()
     serializer_class=GoodsOrderSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
