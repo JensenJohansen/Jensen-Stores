@@ -71,7 +71,6 @@ class CompanyCreateAPIView(ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = CompanySerializer(queryset, many=True)
-        #serializer.is_valid(raise_exception=True)
         serialized_data = serializer.data
         
         for company in serialized_data:
@@ -91,7 +90,7 @@ class CompanyRetrieveUpdateDestroyAPIView(RetrieveUpdateAPIView):
 
 
 class AppUserCreateAPIView(ListCreateAPIView):
-    queryset = AppUser.objects.all()
+    queryset = AppUser.objects.all().order_by("-id")
     serializer_class = UserSerializer
     authentication_classes = [BasicAuthentication,TokenAuthentication]
     permission_classes = [IsAuthenticated, IsShopOwner]

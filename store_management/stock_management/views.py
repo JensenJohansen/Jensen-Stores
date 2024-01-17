@@ -4,7 +4,7 @@ from knox.auth import TokenAuthentication
 from rest_framework.authentication import BasicAuthentication,SessionAuthentication
 from rest_framework.permissions import IsAuthenticated,AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.status import *
-from django.db.models import F
+from django.db.models import F, Count
 from .serializers import *
 from user_management.permissions import *
 
@@ -37,7 +37,11 @@ class StoreListCreateAPIView(ListCreateAPIView):
         filtered_data =  self.get_queryset().filter(company=user_company)
         serializer = self.serializer_class(filtered_data, many=True)
         serialized_data = serializer.data
-        return Response(data=serialized_data,status=HTTP_200_OK)
+        return Response({
+            "count": len(serialized_data),
+            "result": serialized_data
+        })
+
 
 class StoreRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Store.objects.all().order_by('-id')
@@ -62,7 +66,10 @@ class GoodsListCreateAPIView(ListCreateAPIView):
         filtered_data =  self.get_queryset().filter(store__in=stores)
         serializer = self.serializer_class(filtered_data,many=True)
         serialized_data = serializer.data
-        return Response(data=serialized_data,status=HTTP_200_OK)
+        return Response({
+            "count": len(serialized_data),
+            "result": serialized_data
+        })
 
 
 

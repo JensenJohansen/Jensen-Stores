@@ -29,6 +29,15 @@ class OrderListCreateAPIView(ListCreateAPIView):
     authentication_classes = [BasicAuthentication,TokenAuthentication]
     permission_classes = [IsAuthenticated, IsSalesPerson]
     
+    def get_queryset(self):
+        orders = Order.objects.filter(authorizer=None).order_by("-order_no")
+        good = orders.get(order_goods__id=47)
+        print(good)
+        return super().get_queryset()
+    
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+    
     def perform_create(self, serializer):
         pending = OrderStatus.objects.get(status="pending")
         return serializer.save(creator=self.request.user)
