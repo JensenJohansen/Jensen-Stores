@@ -42,9 +42,8 @@ class OrderRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     lookup_field='order_no'
     
     def perform_update(self, serializer):
-        user_group = Group.objects.get(appuser=self.request.user.id)  
-        print(user_group.name)
-        return serializer.save()
+        updater=self.request.user
+        return serializer.save(authorizer=updater)
 
 
 class GoodsOrderUpdateAPIView(RetrieveUpdateDestroyAPIView):

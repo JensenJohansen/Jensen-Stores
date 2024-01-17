@@ -117,6 +117,12 @@ class OrderSerializer(serializers.ModelSerializer):
                             price=item.get("price"),
                         )
                         updated_goods.save()
+            try:
+                changes = validated_data.get("authorization_status")
+                if changes != instance.authorization_status:
+                    instance.authorizer = validated_data["authorizer"]
+            except:
+                pass
             instance.authorization_status = validated_data.get("authorization_status", instance.authorization_status) 
         instance.save()
         return instance
