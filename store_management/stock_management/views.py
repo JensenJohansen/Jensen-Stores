@@ -31,6 +31,13 @@ class StoreListCreateAPIView(ListCreateAPIView):
     
     def perform_create(self, serializer):
         return serializer.save(added_by=self.request.user)
+    
+    def get(self, request, *args, **kwargs):
+        user_company = request.user.user_company
+        filtered_data =  self.get_queryset().filter(company=user_company)
+        serializer = self.serializer_class(filtered_data, many=True)
+        serialized_data = serializer.data
+        return Response(data=serialized_data,status=HTTP_200_OK)
 
 class StoreRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Store.objects.all().order_by('-id')
@@ -48,6 +55,15 @@ class GoodsListCreateAPIView(ListCreateAPIView):
     
     def perform_create(self, serializer):
         return serializer.save(added_by=self.request.user)
+    
+    def get(self, request, *args, **kwargs):
+        user_company = request.user.user_company
+        stores = Store.objects.filter(company=user_company)
+        filtered_data =  self.get_queryset().filter(store__in=stores)
+        serializer = self.serializer_class(filtered_data,many=True)
+        serialized_data = serializer.data
+        return Response(data=serialized_data,status=HTTP_200_OK)
+
 
 
 class GoodsRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
@@ -56,6 +72,7 @@ class GoodsRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [BasicAuthentication,TokenAuthentication]
     permission_classes = [IsAuthenticated, IsShopKeeper]
     lookup_field='id'
+        
 
 
 class UpdateStockListCreateAPIView(ListCreateAPIView):
