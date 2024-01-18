@@ -30,17 +30,17 @@ class OrderListCreateAPIView(ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsSalesPerson]
     
     def get_queryset(self):
-        orders = Order.objects.filter(authorizer=None).order_by("-order_no")
-        good = orders.get(order_goods__id=47)
-        print(good)
-        return super().get_queryset()
+        company = self.request.user.user_company
+        user_company = get_user_model().objects.filter(user_company=company)
+        queryset = Order.objects.filter(creator__in=user_company).order_by("-order_no")
+        return queryset
     
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
     
     def perform_create(self, serializer):
         pending = OrderStatus.objects.get(status="pending")
-        return serializer.save(creator=self.request.user)
+        return serializer.save(creator=self.request.user, authorization_status=pending)
 
 
 class OrderRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
@@ -49,6 +49,11 @@ class OrderRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [BasicAuthentication,TokenAuthentication]
     permission_classes = [IsAuthenticated]
     lookup_field='order_no'
+    
+    def get(self, request, *args, **kwargs):
+        order_goods = self.get_queryset().get("order_goods")
+        print(dir(order_goods))
+        return super().get(request, *args, **kwargs)
     
     def perform_update(self, serializer):
         updater=self.request.user

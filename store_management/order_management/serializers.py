@@ -33,7 +33,7 @@ class OrderSerializer(serializers.ModelSerializer):
     order_goods=serializers.JSONField(write_only=True, required=False)
     total_order_amount = serializers.JSONField(read_only=True)
     creator = serializers.SlugRelatedField(slug_field='username', read_only=True)
-    authorization_status = serializers.SlugRelatedField(slug_field='status', queryset=OrderStatus.objects.all())
+    authorization_status = serializers.SlugRelatedField(slug_field='status', queryset=OrderStatus.objects.all(), required=False)
     class Meta:
         model=Order
         fields='__all__'
@@ -68,19 +68,20 @@ class OrderSerializer(serializers.ModelSerializer):
         """
         Purpose: Create Order
         """
+        authorization_status = validated_data.pop("authorization_status")
         order_goods=validated_data.pop('order_goods')
         caption = validated_data.pop('order_caption')
-        order_discount = validated_data.pop('order_discount')
         creator = validated_data['creator']
-        if order_discount:
-            pass
-        else:
-            order_discount=0.00
+        try:
+            order_discount = validated_data.pop('order_discount')
+        except:
+            order_discount=0.00    
             
         order=Order.objects.create(
             creator=creator, 
             order_caption=caption,
-            order_discount=order_discount
+            order_discount=order_discount,
+            authorization_status=authorization_status,
             )
         try:
             goods_handler=[]
