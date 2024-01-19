@@ -50,11 +50,6 @@ class OrderRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     lookup_field='order_no'
     
-    def get(self, request, *args, **kwargs):
-        order_goods = self.get_queryset().get("order_goods")
-        print(dir(order_goods))
-        return super().get(request, *args, **kwargs)
-    
     def perform_update(self, serializer):
         updater=self.request.user
         return serializer.save(authorizer=updater)
