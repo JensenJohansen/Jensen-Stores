@@ -172,20 +172,37 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
                     }
                 )
             
-            
             if updated_stock.is_valid(raise_exception=True):
                 updated_stock.save(updater=instance.issuer.username)
             
             instance.issued_status = issued_status
+            
+            #changing the status of the order_issued_status everytime changes happen to single goodsorder
+            completion = []
+            order_goods = instance.order.order_goods.all()
+            for item in order_goods:
+                if item.id != instance.id:
+                    status = item.issued_status
+                    completion.append(status)
+                else:
+                    status = issued_status
+                    completion.append(status)
+            if False in completion:
+                instance.order.issued_status = False
+                instance.order.save()
+            else:
+                instance.order.issued_status = True
+                instance.order.save()
         
         if not instance.issued_status:
-            instance.price = validated_data.get("price", instance.price)
-            instance.goods_quantity = validated_data.get("goods_quantity", instance.goods_quantity)
-            
+            if instance.order.authorization_status.status!="paid":
+                instance.price = validated_data.get("price", instance.price)
+                instance.goods_quantity = validated_data.get("goods_quantity", instance.goods_quantity)
+    
         instance.save()
         return instance
 
-"""class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
+class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
     goods_in_pending=serializers.IntegerField(read_only=True)
     goods_available_for_sales=serializers.IntegerField(read_only=True)
     class Meta:
@@ -201,4 +218,4 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
             goods_in_pending.num_of_goods_pending = 0 
         instance.goods_available_for_sales=instance.goods_quantity-goods_in_pending.num_of_goods_pending
         instance.goods_in_pending = goods_in_pending.num_of_goods_pending
-        return super().to_representation(instance)"""
+        return super().to_representation(instance)

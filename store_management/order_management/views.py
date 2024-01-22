@@ -64,3 +64,10 @@ class GoodsOrderUpdateAPIView(RetrieveUpdateDestroyAPIView):
     
     def perform_update(self, serializer):
         return serializer.save(issuer=self.request.user)
+
+
+class GoodsAvailableListView(ListAPIView):
+    queryset = Goods.objects.all().order_by("-id")
+    serializer_class = GoodsAvailableForSalesSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]

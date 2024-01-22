@@ -26,7 +26,7 @@ class Order(models.Model):
     authorizer=models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("user who authorizes an order"),related_name='order_authorizer', on_delete=models.DO_NOTHING,blank=True, null=True)
     authorization_status=models.ForeignKey(OrderStatus, verbose_name=_("Authorized status"), on_delete=models.SET_NULL,null=True,blank=True)
     creator=models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("user who creates an order"), on_delete=models.CASCADE)
-    issued_status=models.BooleanField(_("Has the order been issued?"), default=False)
+    issued_status=models.BooleanField(_("Has the order been completly issued?"), default=False)
     order_discount=models.FloatField(_("Discount given to a user"),default=0.00)
     order_caption=models.TextField(_("Short description about the order"),blank=True, null=True)
     date_added=models.DateTimeField(_("Date an order created"), auto_now=True)

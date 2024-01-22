@@ -39,6 +39,9 @@ class StoreSerializer(serializers.ModelSerializer):
         except:
             raise Company.DoesNotExist
         
+        if not validated_data['store_name']:
+            raise serializers.ValidationError({"store_name": "This field is required"})
+        
         if Store.objects.filter(store_name=validated_data['store_name']).exists():
             raise serializers.ValidationError({"store_name": "store name already in use by another store"})
         
@@ -67,7 +70,7 @@ class GoodsSerializer(serializers.ModelSerializer):
     class Meta:
         model=Goods
         fields='__all__'
-        read_only_fields=['goods_name', 'goods_number', 'goods_quantity', 'lower_price_margin']
+        read_only_fields=['goods_name', 'goods_number', 'goods_quantity', 'lower_price_margin', 'buying_price']
     
     def create(self, validated_data):
         goods = validated_data.pop('goods')
