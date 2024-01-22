@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from stock_management.models import Goods
 from datetime import datetime
 
+
 class OrderStatus(models.Model):
     '''Model definition for OrderStatus.'''
     status=models.CharField(_("Order status"), max_length=50)
