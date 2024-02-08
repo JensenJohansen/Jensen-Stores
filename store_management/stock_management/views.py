@@ -136,3 +136,12 @@ class GoodsOrderIssueCreateAPIView(RetrieveUpdateAPIView):
     authentication_classes = [BasicAuthentication,TokenAuthentication]
     lookup_field='id'
 
+
+class LeakageListCreateView(ListCreateAPIView):
+    queryset = Leakage.objects.all().order_by("-id")
+    serializer_class = LeakageSerializer
+    permission_classes = [IsAuthenticated,]
+    authentication_classes = [TokenAuthentication]
+    
+    def perform_create(self, serializer):
+        return serializer.save(added_by=self.request.user)

@@ -50,6 +50,13 @@ class OrderRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     lookup_field='order_no'
     
+    def get(self, request, order_no):
+        queryset = self.get_queryset().filter(order_no=order_no)
+        serializers = self.serializer_class(queryset, many=True)
+        data = serializers.data
+        
+        return super().get(request)
+    
     def perform_update(self, serializer):
         updater=self.request.user
         return serializer.save(authorizer=updater)
@@ -71,3 +78,10 @@ class GoodsAvailableListView(ListAPIView):
     serializer_class = GoodsAvailableForSalesSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+class GoodsAvailableRetrieveAPIView(RetrieveAPIView):
+    queryset = Goods.objects.all()
+    serializer_class = GoodsAvailableForSalesSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    lookup_field = "id"

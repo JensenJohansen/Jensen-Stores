@@ -6,7 +6,6 @@ class IsShopOwner(permissions.BasePermission):
     def has_permission(self, request, view):
         user_group = Group.objects.get(appuser=request.user)
         user_group = user_group.name.lower()
-        print(user_group)
         
         if request.method in permissions.SAFE_METHODS:
             return True

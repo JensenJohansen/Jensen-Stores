@@ -3,6 +3,7 @@ from .models import *
 from django.db.models import F, Q,Sum
 from datetime import date
 from order_management.models import Order, GoodsOrder
+from order_management import serializers as order_serializers
 from user_management.models import Company
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -115,7 +116,7 @@ class UpdateStockSerializer(serializers.ModelSerializer):
     """def to_representation(self, instance):
         if isinstance(instance, list):
             return instance
-        instance.balance=instance.quantity_available+instance.quantity_added
+        instance.balance=instance.quantity_available+instance.quantity_added    
         return instance"""
     
     def create(self, validated_data):
@@ -182,3 +183,40 @@ class GoodsTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model=GoodsType
         fields='__all__'
+        
+
+class LeakageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Leakage
+        fields = "__all__"
+        read_only_fields = ['added_by']
+    
+    def validate(self, attrs):
+        amount_broken = attrs.get("amount_broken")
+        good = attrs.get('goods')
+        good = order_serializers.GoodsAvailableForSalesSerializer(good)
+        goods_available = good['goods_available_for_sales']
+        
+        if amount_broken < goods_available.value:
+            raise serializers.ValidationError({"amount":"The amount is higher than the available goods"})
+        return attrs
+    
+    def create(self, validated_data):
+        goods = validated_data.get('goods')
+        amount_broken = validated_data.get('amount_broken')
+        leakage_summery = validated_data.get('leakage_summery')
+        added_by = validated_data.get("added_by")
+        
+        goods_update = UpdateStockSerializer(
+                data={
+                    "update": [
+                        {
+                        "goods":goods.id,
+                        "quantity_added": -amount_broken
+                        }
+                        ]
+                    }
+                )
+        if goods_update.is_valid(raise_exception=True):
+                goods_update.save(updater=added_by.username)
+        return super().create(validated_data)

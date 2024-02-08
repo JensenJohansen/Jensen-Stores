@@ -3,7 +3,8 @@ from django.shortcuts import get_object_or_404
 from .models import *
 from django.db.models import Sum,F,Q,Case,When,Value
 from datetime import date
-from stock_management.serializers import UpdateStockSerializer
+from stock_management import serializers as stock_serializers
+
 
 class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,8 +33,10 @@ class OrderSerializer(serializers.ModelSerializer):
     order_goods_details=GoodsOrderReadSerializer(many=True,source='order_goods', read_only=True)
     order_goods=serializers.JSONField(write_only=True, required=False)
     total_order_amount = serializers.JSONField(read_only=True)
+    cash_authorizer = serializers.JSONField(read_only=True)
     creator = serializers.SlugRelatedField(slug_field='username', read_only=True)
     authorization_status = serializers.SlugRelatedField(slug_field='status', queryset=OrderStatus.objects.all(), required=False)
+    
     class Meta:
         model=Order
         fields='__all__'
@@ -129,6 +132,7 @@ class OrderSerializer(serializers.ModelSerializer):
         return instance
     
     def to_representation(self, instance):
+        instance.cash_authorizer = instance.authorizer.username
         try:
             order_total=GoodsOrder.objects.filter(order=instance).aggregate(total=Sum(F('price')*F('goods_quantity')))
             if order_total['total'] is not None:
@@ -161,7 +165,7 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
             else:
                 quantity = quantity
             
-            updated_stock = UpdateStockSerializer(
+            updated_stock = stock_serializers.UpdateStockSerializer(
                 data={
                     "update": [
                         {
@@ -208,7 +212,8 @@ class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
     class Meta:
         model=Goods
         fields='__all__'
-        
+    
+    
     def to_representation(self, instance):
         goods_in_pending=Goods.objects.annotate(
             num_of_goods_pending=Sum(

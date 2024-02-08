@@ -10,6 +10,7 @@ urlpatterns = [
     path("goods/<int:id>/", GoodsRetrieveUpdateDestroyAPIView.as_view(), name="goods-details"),
     path("stock_update/", UpdateStockListCreateAPIView.as_view(), name="stock-update"),
     path("stock_update/<int:goods>/", GoodsUpdateListAPIView.as_view(), name="stock-update-entry"),
+    path("leakage/", LeakageListCreateView.as_view(), name="leakage"),
     path("least_goods_quantity/<int:threshold>/", LeastStockGoodsListAPIView.as_view(), name="least_goods_quantity"),
     path("order_issue/", OrderIssueCreateAPIView.as_view(), name="order-issue"),
     path("order_issue_goods/", GoodsOrderIssueListView.as_view(), name="goods-issue"),

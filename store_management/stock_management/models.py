@@ -65,6 +65,7 @@ class Goods(models.Model):
     store=models.ForeignKey(Store, verbose_name=_("store goods found"),related_name='store', on_delete=models.DO_NOTHING)
     added_by=models.ForeignKey(get_user_model(), verbose_name=_("User who added goods"), on_delete=models.DO_NOTHING)
     date_added=models.DateTimeField(_("date goods added"), auto_now=True)
+    
     class Meta:
         '''Meta definition for Goods.'''
         unique_together=['goods_number','store',]
@@ -85,3 +86,19 @@ class GoodsUpdate(models.Model):
     class Meta:
         verbose_name = 'GoodsUpdate'
         verbose_name_plural = 'GoodsUpdates'
+
+
+class Leakage(models.Model):
+    """
+    A model that define the leaked or broken goods in the company
+    """
+    goods = models.ForeignKey(Goods, verbose_name=_("broken goods"), on_delete=models.CASCADE)
+    amount_broken = models.IntegerField(_("how many that broke"))
+    leakage_summery = models.CharField(_("leakage summery"), max_length=150)
+    broken_date = models.DateTimeField(_("Date for the leakage"), auto_now=True, auto_now_add=False)
+    added_by = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
+    
+    def __str__(self) -> str:
+        return f"broken: {self.goods} - {self.amount_broken}"
+    
+    

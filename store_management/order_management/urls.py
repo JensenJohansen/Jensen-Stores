@@ -7,5 +7,6 @@ urlpatterns = [
     path("create_order/", OrderListCreateAPIView.as_view(), name="create_order"),
     path("create_order/<int:order_no>/", OrderRetrieveUpdateDestroyAPIView.as_view(), name="single_order"),
     path("update_goods_order/<int:id>/", GoodsOrderUpdateAPIView.as_view(), name="single_goods_order"),
-    path("goods_available/", GoodsAvailableListView.as_view(), name="goods_available_for_sale")
+    path("goods_available/", GoodsAvailableListView.as_view(), name="goods_available_for_sale"),
+    path("goods_available/<int:id>/", GoodsAvailableRetrieveAPIView.as_view(), name="goods_available_retrieve")
 ]
