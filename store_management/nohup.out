@@ -408,3 +408,215 @@ Not Found: /*
 [2023-08-04 16:19:28 +0000] [51413] [INFO] Handling signal: term
 [2023-08-04 19:19:28 +0300] [51414] [INFO] Worker exiting (pid: 51414)
 [2023-08-04 16:19:28 +0000] [51413] [INFO] Shutting down: Master
+[2024-02-08 22:39:01 +0000] [2199] [INFO] Starting gunicorn 21.2.0
+[2024-02-08 22:39:01 +0000] [2199] [INFO] Listening at: http://0.0.0.0:8000 (2199)
+[2024-02-08 22:39:01 +0000] [2199] [INFO] Using worker: sync
+[2024-02-08 22:39:01 +0000] [2200] [INFO] Booting worker with pid: 2200
+[2024-02-08 22:40:08 +0000] [2199] [CRITICAL] WORKER TIMEOUT (pid:2200)
+[2024-02-09 01:40:08 +0300] [2200] [INFO] Worker exiting (pid: 2200)
+[2024-02-08 22:40:08 +0000] [2199] [ERROR] Worker (pid:2200) exited with code 1
+[2024-02-08 22:40:08 +0000] [2199] [ERROR] Worker (pid:2200) exited with code 1.
+[2024-02-08 22:40:08 +0000] [2210] [INFO] Booting worker with pid: 2210
+[2024-02-08 22:40:57 +0000] [2199] [CRITICAL] WORKER TIMEOUT (pid:2210)
+[2024-02-09 01:40:57 +0300] [2210] [INFO] Worker exiting (pid: 2210)
+[2024-02-08 22:40:57 +0000] [2199] [ERROR] Worker (pid:2210) exited with code 1
+[2024-02-08 22:40:57 +0000] [2199] [ERROR] Worker (pid:2210) exited with code 1.
+[2024-02-08 22:40:57 +0000] [2214] [INFO] Booting worker with pid: 2214
+[2024-02-09 01:41:28 +0300] [2214] [WARNING] Invalid request from ip=41.222.177.126: Invalid HTTP method: "\x16\x03\x01\x02+\x01\x00\x02'\x03\x03BÁ1¥Fó\x81@\x8c¯~o©¬\x94\x90ÓK-¿\x00cµ\x8cFu\x98úÉsÿk"
+[2024-02-08 22:42:35 +0000] [2199] [CRITICAL] WORKER TIMEOUT (pid:2214)
+[2024-02-09 01:42:35 +0300] [2214] [INFO] Worker exiting (pid: 2214)
+[2024-02-08 22:42:35 +0000] [2199] [ERROR] Worker (pid:2214) exited with code 1
+[2024-02-08 22:42:35 +0000] [2199] [ERROR] Worker (pid:2214) exited with code 1.
+[2024-02-08 22:42:35 +0000] [2223] [INFO] Booting worker with pid: 2223
+Not Found: /
+Not Found: /favicon.ico
+Invalid HTTP_HOST header: '161.35.40.120:8000'. You may need to add '161.35.40.120' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/home/parentenv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/parentenv/lib/python3.11/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/parentenv/lib/python3.11/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/parentenv/lib/python3.11/site-packages/django/http/request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '161.35.40.120:8000'. You may need to add '161.35.40.120' to ALLOWED_HOSTS.
+Bad Request: /
+Invalid HTTP_HOST header: '161.35.40.120:8000'. You may need to add '161.35.40.120' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/home/parentenv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/parentenv/lib/python3.11/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/parentenv/lib/python3.11/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/parentenv/lib/python3.11/site-packages/django/http/request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '161.35.40.120:8000'. You may need to add '161.35.40.120' to ALLOWED_HOSTS.
+Bad Request: /
+Invalid HTTP_HOST header: '0.0.0.0:8000'. You may need to add '0.0.0.0' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "/home/parentenv/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/parentenv/lib/python3.11/site-packages/django/utils/deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/parentenv/lib/python3.11/site-packages/django/middleware/common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/parentenv/lib/python3.11/site-packages/django/http/request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: '0.0.0.0:8000'. You may need to add '0.0.0.0' to ALLOWED_HOSTS.
+Bad Request: /*
+[2024-02-08 22:52:51 +0000] [2199] [CRITICAL] WORKER TIMEOUT (pid:2223)
+[2024-02-09 01:52:51 +0300] [2223] [INFO] Worker exiting (pid: 2223)
+[2024-02-08 22:52:51 +0000] [2199] [ERROR] Worker (pid:2223) exited with code 1
+[2024-02-08 22:52:51 +0000] [2199] [ERROR] Worker (pid:2223) exited with code 1.
+[2024-02-08 22:52:51 +0000] [2325] [INFO] Booting worker with pid: 2325
+Not Found: /
+[2024-02-08 23:17:09 +0000] [2199] [INFO] Handling signal: term
+[2024-02-09 02:17:09 +0300] [2325] [INFO] Worker exiting (pid: 2325)
+[2024-02-08 23:17:09 +0000] [2199] [INFO] Shutting down: Master
+[2024-02-08 23:18:08 +0000] [2524] [INFO] Starting gunicorn 21.2.0
+[2024-02-08 23:18:08 +0000] [2524] [INFO] Listening at: http://0.0.0.0:8000 (2524)
+[2024-02-08 23:18:08 +0000] [2524] [INFO] Using worker: sync
+[2024-02-08 23:18:08 +0000] [2525] [INFO] Booting worker with pid: 2525
+[2024-02-09 08:20:27 +0000] [2524] [INFO] Handling signal: term
+[2024-02-09 11:20:27 +0300] [2525] [INFO] Worker exiting (pid: 2525)
+[2024-02-09 08:20:27 +0000] [2524] [ERROR] Worker (pid:2525) was sent SIGTERM!
+[2024-02-09 08:20:27 +0000] [2524] [INFO] Shutting down: Master
+[2024-02-09 08:21:15 +0000] [18585] [INFO] Starting gunicorn 21.2.0
+[2024-02-09 08:21:15 +0000] [18585] [INFO] Listening at: http://0.0.0.0:8000 (18585)
+[2024-02-09 08:21:15 +0000] [18585] [INFO] Using worker: sync
+[2024-02-09 08:21:15 +0000] [18586] [INFO] Booting worker with pid: 18586
+[2024-02-09 08:22:38 +0000] [18585] [INFO] Handling signal: term
+[2024-02-09 11:22:38 +0300] [18586] [INFO] Worker exiting (pid: 18586)
+[2024-02-09 08:22:38 +0000] [18585] [INFO] Shutting down: Master
+[2024-02-09 08:26:41 +0000] [18646] [INFO] Starting gunicorn 21.2.0
+[2024-02-09 08:26:41 +0000] [18646] [INFO] Listening at: http://0.0.0.0:8000 (18646)
+[2024-02-09 08:26:41 +0000] [18646] [INFO] Using worker: sync
+[2024-02-09 08:26:41 +0000] [18647] [INFO] Booting worker with pid: 18647
+[2024-02-09 08:29:52 +0000] [18646] [INFO] Handling signal: term
+[2024-02-09 11:29:52 +0300] [18647] [INFO] Worker exiting (pid: 18647)
+[2024-02-09 08:29:53 +0000] [18646] [INFO] Shutting down: Master
+[2024-02-09 08:35:02 +0000] [18724] [INFO] Starting gunicorn 21.2.0
+[2024-02-09 08:35:02 +0000] [18724] [INFO] Listening at: http://0.0.0.0:8000 (18724)
+[2024-02-09 08:35:02 +0000] [18724] [INFO] Using worker: sync
+[2024-02-09 08:35:02 +0000] [18725] [INFO] Booting worker with pid: 18725
+[2024-02-09 08:40:45 +0000] [18724] [INFO] Handling signal: term
+[2024-02-09 11:40:45 +0300] [18725] [INFO] Worker exiting (pid: 18725)
+[2024-02-09 08:40:45 +0000] [18724] [INFO] Shutting down: Master
+[2024-02-09 08:40:52 +0000] [18761] [INFO] Starting gunicorn 21.2.0
+[2024-02-09 08:40:52 +0000] [18761] [INFO] Listening at: http://0.0.0.0:8000 (18761)
+[2024-02-09 08:40:52 +0000] [18761] [INFO] Using worker: sync
+[2024-02-09 08:40:52 +0000] [18762] [INFO] Booting worker with pid: 18762
+[2024-02-09 08:41:47 +0000] [18761] [INFO] Handling signal: term
+[2024-02-09 11:41:47 +0300] [18762] [INFO] Worker exiting (pid: 18762)
+[2024-02-09 08:41:47 +0000] [18761] [INFO] Shutting down: Master
+[2024-02-09 08:47:16 +0000] [18809] [INFO] Starting gunicorn 21.2.0
+[2024-02-09 08:47:16 +0000] [18809] [INFO] Listening at: http://0.0.0.0:8000 (18809)
+[2024-02-09 08:47:16 +0000] [18809] [INFO] Using worker: sync
+[2024-02-09 08:47:16 +0000] [18810] [INFO] Booting worker with pid: 18810
+[2024-02-09 08:52:59 +0000] [18809] [INFO] Handling signal: term
+[2024-02-09 11:52:59 +0300] [18810] [INFO] Worker exiting (pid: 18810)
+[2024-02-09 08:52:59 +0000] [18809] [ERROR] Worker (pid:18810) was sent SIGTERM!
+[2024-02-09 08:52:59 +0000] [18809] [INFO] Shutting down: Master
+[2024-02-09 08:53:17 +0000] [18890] [INFO] Starting gunicorn 21.2.0
+[2024-02-09 08:53:17 +0000] [18890] [INFO] Listening at: http://0.0.0.0:8000 (18890)
+[2024-02-09 08:53:17 +0000] [18890] [INFO] Using worker: sync
+[2024-02-09 08:53:17 +0000] [18891] [INFO] Booting worker with pid: 18891
+[2024-02-09 11:56:22 +0300] [18891] [INFO] Worker exiting (pid: 18891)
+[2024-02-09 08:56:22 +0000] [18890] [INFO] Handling signal: term
+[2024-02-09 08:56:22 +0000] [18890] [ERROR] Worker (pid:18891) was sent SIGTERM!
+[2024-02-09 08:56:23 +0000] [18890] [INFO] Shutting down: Master
+[2024-02-09 09:04:08 +0000] [19013] [INFO] Starting gunicorn 21.2.0
+[2024-02-09 09:04:08 +0000] [19013] [INFO] Listening at: http://0.0.0.0:8000 (19013)
+[2024-02-09 09:04:08 +0000] [19013] [INFO] Using worker: sync
+[2024-02-09 09:04:08 +0000] [19014] [INFO] Booting worker with pid: 19014
+[2024-02-09 11:43:50 +0000] [19013] [INFO] Handling signal: term
+[2024-02-09 14:43:50 +0300] [19014] [INFO] Worker exiting (pid: 19014)
+[2024-02-09 11:43:50 +0000] [19013] [ERROR] Worker (pid:19014) was sent SIGTERM!
+[2024-02-09 11:43:50 +0000] [19013] [INFO] Shutting down: Master
+[2024-02-09 12:23:42 +0000] [20952] [INFO] Starting gunicorn 21.2.0
+[2024-02-09 12:23:42 +0000] [20952] [INFO] Listening at: http://0.0.0.0:8000 (20952)
+[2024-02-09 12:23:42 +0000] [20952] [INFO] Using worker: sync
+[2024-02-09 12:23:42 +0000] [20953] [INFO] Booting worker with pid: 20953
+[2024-02-10 06:48:28 +0000] [20952] [INFO] Handling signal: term
+[2024-02-10 09:48:28 +0300] [20953] [INFO] Worker exiting (pid: 20953)
+[2024-02-10 06:48:28 +0000] [20952] [ERROR] Worker (pid:20953) was sent SIGTERM!
+[2024-02-10 06:48:28 +0000] [20952] [INFO] Shutting down: Master
+[2024-02-10 06:48:39 +0000] [41786] [INFO] Starting gunicorn 21.2.0
+[2024-02-10 06:48:39 +0000] [41786] [INFO] Listening at: http://0.0.0.0:8000 (41786)
+[2024-02-10 06:48:39 +0000] [41786] [INFO] Using worker: sync
+[2024-02-10 06:48:39 +0000] [41787] [INFO] Booting worker with pid: 41787
+[2024-02-10 06:54:08 +0000] [41786] [INFO] Handling signal: term
+[2024-02-10 09:54:08 +0300] [41787] [INFO] Worker exiting (pid: 41787)
+[2024-02-10 06:54:08 +0000] [41786] [ERROR] Worker (pid:41787) was sent SIGTERM!
+[2024-02-10 06:54:08 +0000] [41786] [INFO] Shutting down: Master
+[2024-02-10 06:55:59 +0000] [41829] [INFO] Starting gunicorn 21.2.0
+[2024-02-10 06:55:59 +0000] [41829] [INFO] Listening at: http://0.0.0.0:8000 (41829)
+[2024-02-10 06:55:59 +0000] [41829] [INFO] Using worker: sync
+[2024-02-10 06:55:59 +0000] [41830] [INFO] Booting worker with pid: 41830
+[2024-02-10 09:59:35 +0300] [41830] [INFO] Worker exiting (pid: 41830)
+[2024-02-10 06:59:35 +0000] [41829] [INFO] Handling signal: term
+[2024-02-10 06:59:35 +0000] [41829] [ERROR] Worker (pid:41830) was sent SIGTERM!
+[2024-02-10 06:59:36 +0000] [41829] [INFO] Shutting down: Master
+[2024-02-10 06:59:44 +0000] [41856] [INFO] Starting gunicorn 21.2.0
+[2024-02-10 06:59:44 +0000] [41856] [INFO] Listening at: http://0.0.0.0:8000 (41856)
+[2024-02-10 06:59:44 +0000] [41856] [INFO] Using worker: sync
+[2024-02-10 06:59:44 +0000] [41857] [INFO] Booting worker with pid: 41857
+[2024-02-10 10:42:31 +0300] [41857] [WARNING] Invalid request from ip=152.32.247.22: Invalid HTTP request line: ''
+[2024-02-10 12:26:32 +0300] [41857] [WARNING] Invalid request from ip=212.70.149.146: Invalid HTTP request line: '\x03\x00\x00/*à\x00\x00\x00\x00\x00Cookie: mstshash=Administr'
+[2024-02-10 12:27:21 +0300] [41857] [WARNING] Invalid request from ip=212.70.149.146: Invalid HTTP request line: '\x03\x00\x00/*à\x00\x00\x00\x00\x00Cookie: mstshash=Administr'
+[2024-02-10 12:48:25 +0300] [41857] [WARNING] Invalid request from ip=212.70.149.146: Invalid HTTP request line: '\x03\x00\x00/*à\x00\x00\x00\x00\x00Cookie: mstshash=Administr'
+[2024-02-10 12:48:56 +0300] [41857] [WARNING] Invalid request from ip=212.70.149.146: Invalid HTTP request line: '\x03\x00\x00/*à\x00\x00\x00\x00\x00Cookie: mstshash=Administr'
+[2024-02-10 13:10:11 +0300] [41857] [WARNING] Invalid request from ip=212.70.149.146: Invalid HTTP request line: '\x03\x00\x00/*à\x00\x00\x00\x00\x00Cookie: mstshash=Administr'
+[2024-02-10 13:10:39 +0300] [41857] [WARNING] Invalid request from ip=212.70.149.146: Invalid HTTP request line: '\x03\x00\x00/*à\x00\x00\x00\x00\x00Cookie: mstshash=Administr'
+[2024-02-10 16:52:42 +0000] [41856] [CRITICAL] WORKER TIMEOUT (pid:41857)
+[2024-02-10 19:52:42 +0300] [41857] [INFO] Worker exiting (pid: 41857)
+[2024-02-10 16:52:42 +0000] [41856] [ERROR] Worker (pid:41857) exited with code 1
+[2024-02-10 16:52:42 +0000] [41856] [ERROR] Worker (pid:41857) exited with code 1.
+[2024-02-10 16:52:42 +0000] [49676] [INFO] Booting worker with pid: 49676
+[2024-02-11 07:46:48 +0000] [41856] [CRITICAL] WORKER TIMEOUT (pid:49676)
+[2024-02-11 10:46:48 +0300] [49676] [INFO] Worker exiting (pid: 49676)
+[2024-02-11 07:46:48 +0000] [41856] [ERROR] Worker (pid:49676) exited with code 1
+[2024-02-11 07:46:48 +0000] [41856] [ERROR] Worker (pid:49676) exited with code 1.
+[2024-02-11 07:46:48 +0000] [61609] [INFO] Booting worker with pid: 61609
+[2024-02-11 12:38:33 +0300] [61609] [INFO] Worker exiting (pid: 61609)
+[2024-02-11 09:38:33 +0000] [41856] [INFO] Handling signal: term
+[2024-02-11 09:38:34 +0000] [41856] [INFO] Shutting down: Master
+[2024-02-11 09:39:51 +0000] [62914] [INFO] Starting gunicorn 21.2.0
+[2024-02-11 09:39:51 +0000] [62914] [INFO] Listening at: http://0.0.0.0:8000 (62914)
+[2024-02-11 09:39:51 +0000] [62914] [INFO] Using worker: sync
+[2024-02-11 09:39:51 +0000] [62915] [INFO] Booting worker with pid: 62915
+[2024-02-11 10:07:39 +0000] [62914] [INFO] Handling signal: term
+[2024-02-11 13:07:39 +0300] [62915] [INFO] Worker exiting (pid: 62915)
+[2024-02-11 10:07:39 +0000] [62914] [ERROR] Worker (pid:62915) was sent SIGTERM!
+[2024-02-11 10:07:39 +0000] [62914] [INFO] Shutting down: Master
+[2024-02-11 10:34:02 +0000] [64172] [INFO] Starting gunicorn 21.2.0
+[2024-02-11 10:34:02 +0000] [64172] [INFO] Listening at: http://0.0.0.0:8000 (64172)
+[2024-02-11 10:34:02 +0000] [64172] [INFO] Using worker: sync
+[2024-02-11 10:34:02 +0000] [64173] [INFO] Booting worker with pid: 64173
+[2024-02-11 13:46:19 +0300] [64173] [INFO] Worker exiting (pid: 64173)
+[2024-02-11 10:46:19 +0000] [64172] [INFO] Handling signal: term
+[2024-02-11 10:46:19 +0000] [64172] [ERROR] Worker (pid:64173) was sent SIGTERM!
+[2024-02-11 10:46:19 +0000] [64172] [INFO] Shutting down: Master
+[2024-02-12 06:16:41 +0000] [84652] [INFO] Starting gunicorn 21.2.0
+[2024-02-12 06:16:41 +0000] [84652] [INFO] Listening at: http://0.0.0.0:8000 (84652)
+[2024-02-12 06:16:41 +0000] [84652] [INFO] Using worker: sync
+[2024-02-12 06:16:41 +0000] [84653] [INFO] Booting worker with pid: 84653
+[2024-02-12 09:34:30 +0300] [84653] [INFO] Worker exiting (pid: 84653)
+[2024-02-12 06:34:30 +0000] [84652] [INFO] Handling signal: term
+[2024-02-12 06:34:30 +0000] [84652] [ERROR] Worker (pid:84653) was sent SIGTERM!
+[2024-02-12 06:34:30 +0000] [84652] [INFO] Shutting down: Master
+[2024-02-12 06:34:45 +0000] [85529] [INFO] Starting gunicorn 21.2.0
+[2024-02-12 06:34:45 +0000] [85529] [INFO] Listening at: http://0.0.0.0:8000 (85529)
+[2024-02-12 06:34:45 +0000] [85529] [INFO] Using worker: sync
+[2024-02-12 06:34:45 +0000] [85530] [INFO] Booting worker with pid: 85530
