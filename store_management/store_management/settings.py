@@ -33,7 +33,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['caffeinebackend.birikatechnologies.co.tz','159.65.208.165']
+ALLOWED_HOSTS = ['http://caffeinebackend.birikatechnologies.co.tz','159.65.208.165']
 
 
 
