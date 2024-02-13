@@ -34,9 +34,13 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = False
 
 ALLOWED_HOSTS = ['caffeinebackend.birikatechnologies.co.tz','159.65.208.165']
-CORS_ALLOWED_ORIGINS = [
-    "*"
-]
+CORS_ALLOW_ALL_ORIGINS = True
+#CORS_ALLOWED_ORIGINS = [
+    #'http://business.birikatechnologies.co.tz',
+   # 'http://localhost:3000',
+  #  'http://159.65.208.165',
+ #   'http://127.0.0.1:3000'
+#]
 
 # Application definition
 
