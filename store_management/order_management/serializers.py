@@ -132,7 +132,10 @@ class OrderSerializer(serializers.ModelSerializer):
         return instance
     
     def to_representation(self, instance):
-        instance.cash_authorizer = instance.authorizer.username
+        try:
+            instance.cash_authorizer = instance.authorizer.username
+        except:
+            instance.cash_authorizer = None
         try:
             order_total=GoodsOrder.objects.filter(order=instance).aggregate(total=Sum(F('price')*F('goods_quantity')))
             if order_total['total'] is not None:
