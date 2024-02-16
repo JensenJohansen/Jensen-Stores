@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from .managers import CustomUserManager
 from django.contrib.auth.models  import Group
+from phonenumber_field.modelfields import PhoneNumberField
 
     
 class Company(models.Model):
@@ -61,3 +62,15 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+
+
+class Customer(models.Model):
+    """"
+    A model definition for the company customers
+    """
+    customer_username = models.CharField(_("Customer name"), max_length=50)
+    customer_phone = PhoneNumberField(blank=False, unique=True)
+    customer_company = models.ForeignKey(Company, verbose_name=_("customer company"), on_delete=models.CASCADE)
+    
+    def __str__(self) -> str:
+        return self.customer_username

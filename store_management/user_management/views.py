@@ -48,8 +48,23 @@ class SubscriptionListView(ListCreateAPIView):
     serializer_class = SubscriptionSerializer
     authentication_classes = [BasicAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+
+class CustomerListCreateView(ListCreateAPIView):
+    queryset = Customer.objects.all().order_by('-id')
+    serializer_class = CustomerSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
     
-    
+
+class CustomerRetrieveUpdateDestroy(RetrieveUpdateDestroyAPIView):
+    queryset = Customer.objects.all()
+    serializer_class = CustomerSerializer
+    authentication_classes = [TokenAuthentication,]
+    permission_classes = [IsAuthenticated]
+    lookup_field = "id"
+
+
 class CompanyCreateAPIView(ListCreateAPIView):
     queryset = Company.objects.all().order_by('-id')
     serializer_class = CompanySerializer

@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     "order_management",
     "rest_framework",
     "knox",
-    'corsheaders'
+    'corsheaders',
+    'phonenumber_field',
 
 ]
 

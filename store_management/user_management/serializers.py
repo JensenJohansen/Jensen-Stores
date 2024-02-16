@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group
 from django.db.models import Q, F
 from rest_framework import serializers
-from .models import Company, AppUser, Subscription
+from .models import Company, AppUser, Subscription, Customer
 from django.contrib.auth import authenticate, login, models, get_user_model
 from rest_framework.response import Response
 import datetime
@@ -27,6 +27,29 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
         fields = '__all__'
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Customer
+        fields = '__all__'
+        
+    def create(self, validated_data):
+        customer_username = validated_data.get("customer_username").title()
+        customer_phone = validated_data.get("customer_phone")
+        customer_company = validated_data.get("customer_company")
+        
+        customer = Customer(
+            customer_username=customer_username, 
+            customer_phone=customer_phone, 
+            customer_company=customer_company
+            )
+        
+        if customer:
+            customer.save()
+        
+        return customer
+        
 
 
 class CompanySerializer(serializers.ModelSerializer):
