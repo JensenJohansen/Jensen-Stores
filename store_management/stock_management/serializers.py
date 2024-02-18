@@ -89,6 +89,12 @@ class GoodsSerializer(serializers.ModelSerializer):
             except Exception as e:
                 raise(e)
             
+            try:
+                added_goods = Goods.objects.get(goods_number=item.goods_number)
+                print(added_goods)
+            except:
+                pass
+            
             item = Goods(
                 goods_type=goods_type,
                 store=store,

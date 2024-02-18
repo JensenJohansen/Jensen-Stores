@@ -5,9 +5,11 @@ Django==4.2.1
 django-cors-headers==4.3.1
 django-environ==0.10.0
 django-filter==23.2
+django-phonenumber-field==7.3.0
 django-rest-knox==4.2.0
 djangorestframework==3.14.0
 greenlet==2.0.2
+phonenumbers==8.13.29
 psycopg2-binary==2.9.9
 pycparser==2.21
 pytz==2023.3

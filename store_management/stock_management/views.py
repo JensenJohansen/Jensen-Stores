@@ -11,8 +11,15 @@ from user_management.permissions import *
 class GoodsTypeCreateAPIView(ListCreateAPIView):
     queryset = GoodsType.objects.all().order_by('-id')
     serializer_class = GoodsTypeSerializer
-    authentication_classes = [BasicAuthentication,TokenAuthentication]
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsShopOwner]
+    
+    def get(self, request, *args, **kwargs):
+        user_company = request.user.user_company
+        filtered_data =  self.get_queryset().filter(company=user_company)
+        serializer = self.serializer_class(filtered_data, many=True)
+        serialized_data = serializer.data
+        return Response(serialized_data)
 
 
 class GoodsTypeRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
