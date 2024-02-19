@@ -6,6 +6,8 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated,AllowAny
 from user_management.permissions import *
 from .permissions import *
+from rest_framework.status import *
+from rest_framework.response import Response
 
 
 class OrderStatusListCreateAPIView(ListCreateAPIView):
@@ -85,3 +87,19 @@ class GoodsAvailableRetrieveAPIView(RetrieveAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     lookup_field = "id"
+    
+
+class DeleteOrderCreateAPIView(CreateAPIView):
+    serializer_class = DeleteOrderSerializer
+    
+    def post(self,request):
+        data={
+            "order_no":self.request.data['order_no'],
+            "deleted_by":self.request.user.id
+        }
+        serializer=self.serializer_class(data=data)
+        if serializer.is_valid():
+            return_data=serializer.save()
+        return Response(return_data,status=HTTP_200_OK)
+
+
