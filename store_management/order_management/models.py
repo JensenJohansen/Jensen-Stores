@@ -55,3 +55,13 @@ class GoodsOrder(models.Model):
     
     def __str__(self) -> str:
         return f'{self.goods.goods_name} for order {self.order}'
+    
+class DeletedOrder(models.Model):
+
+    order_no=models.IntegerField(_("Order number"))
+    deleted_by=models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("user who deleted an order"),related_name='goods_deleter', on_delete=models.CASCADE)
+    goods_object=models.JSONField(_("deleted goods json"))
+    deleted_time=models.DateTimeField(_("date the order deleted"), auto_now=True)
+    class Meta:
+        verbose_name = _("DeletedOrder")
+        verbose_name_plural = _("DeletedOrders")

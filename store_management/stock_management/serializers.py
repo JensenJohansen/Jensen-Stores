@@ -104,6 +104,16 @@ class GoodsSerializer(serializers.ModelSerializer):
             items.append(item)
         created_items = Goods.objects.bulk_create(items)
         return created_items
+    
+class GoodsUSerializer(serializers.ModelSerializer):
+    store=serializers.PrimaryKeyRelatedField(queryset=Store.objects.all())
+    goods_type=serializers.PrimaryKeyRelatedField(queryset=GoodsType.objects.all())
+    added_by=serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
+    class Meta:
+        model = Goods
+        fields = '__all__'
+        read_only_fields=['goods_quantity',]
+        
 
 class UpdateStockSerializer(serializers.ModelSerializer):
     """

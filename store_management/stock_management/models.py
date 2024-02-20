@@ -78,11 +78,18 @@ class Goods(models.Model):
 
 
 class GoodsUpdate(models.Model):
+    choice_order=[
+        'deleted_order','Deleted Order',
+        'issued_order', 'Issued Order',
+        'updated_stock','Updated Stock'
+    ]
+    
     goods=models.ForeignKey(Goods, verbose_name=_("Goods to be updated"), on_delete=models.CASCADE)
     updated_by=models.ForeignKey(get_user_model(), verbose_name=_("User who updated goods"), on_delete=models.DO_NOTHING)
     quantity_available=models.IntegerField(_("Quantity available"))
     quantity_added=models.IntegerField(_("Quantity added"))
     updated_on=models.DateField(_("Date goods updated"), auto_now=True)
+    goods_update_reason=models.CharField(_("reason for Update"), max_length=30,default='updated_stock')
     
     class Meta:
         verbose_name = 'GoodsUpdate'
