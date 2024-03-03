@@ -96,6 +96,18 @@ class UpdateStockListCreateAPIView(ListCreateAPIView):
 
     def perform_create(self, serializer):
         return serializer.save(updater=self.request.user.username)
+    
+    def get(self, request, *args, **kwargs):
+        request_user = request.user
+        user_company = request_user.user_company
+        users = get_user_model().objects.filter(user_company=user_company)
+        filtered_data = self.get_queryset().filter(updated_by__in=users)
+        serializer = self.serializer_class(filtered_data,many=True)
+        serialized_data = serializer.data
+        return Response({
+            "count": len(serialized_data),
+            "results": serialized_data
+        })
 
 
 class GoodsUpdateListAPIView(ListAPIView):

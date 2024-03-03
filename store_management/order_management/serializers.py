@@ -68,11 +68,12 @@ class OrderSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "Goods_quantity: you entered more orders than the quantity available"
                 )
-
-            if price < item.lower_price_margin:
+                
+            #deprecated
+            """if price < item.lower_price_margin:
                 raise serializers.ValidationError(
                     "Price: Please consider lower price margin"
-                )
+                )"""
 
         return attrs
 
