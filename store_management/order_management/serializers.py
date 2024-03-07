@@ -236,7 +236,7 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
 
 class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
     store_details=StoreSerializer(read_only=True,source='store')
-    goods_type=serializers.SlugRelatedField(slug_field='goods_type',queryset=GoodsType.objects.all())
+    goods_type_details=GoodsTypeSerializer(read_only=True,source='goods_type')
     goods_in_pending = serializers.IntegerField(read_only=True)
     goods_available_for_sales = serializers.IntegerField(read_only=True)
 
