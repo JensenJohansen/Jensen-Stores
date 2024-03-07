@@ -91,7 +91,6 @@ class GoodsSerializer(serializers.ModelSerializer):
             
             try:
                 added_goods = Goods.objects.get(goods_number=item.goods_number)
-                print(added_goods)
             except:
                 pass
             
@@ -213,7 +212,7 @@ class LeakageSerializer(serializers.ModelSerializer):
         good = order_serializers.GoodsAvailableForSalesSerializer(good)
         goods_available = good['goods_available_for_sales']
         
-        if amount_broken < goods_available.value:
+        if amount_broken <= goods_available.value:
             raise serializers.ValidationError({"amount":"The amount is higher than the available goods"})
         return attrs
     

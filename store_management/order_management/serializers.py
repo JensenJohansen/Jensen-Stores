@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
+
+from store_management.stock_management.models import GoodsType
 from .models import *
-from django.db.models import Sum, F, Q, Case, When, Value
+from django.db.models import Sum, F, Q
 from datetime import date
 from stock_management import serializers as stock_serializers
 
@@ -235,6 +237,8 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
 
 
 class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
+    store_details=stock_serializers.StoreSerializer(read_only=True,source='store')
+    goods_type=serializers.SlugRelatedField(slug_field='goods_type',queryset=GoodsType.objects.all())
     goods_in_pending = serializers.IntegerField(read_only=True)
     goods_available_for_sales = serializers.IntegerField(read_only=True)
 
