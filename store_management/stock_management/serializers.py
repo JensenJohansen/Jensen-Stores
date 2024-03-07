@@ -107,19 +107,20 @@ class GoodsSerializer(serializers.ModelSerializer):
         return created_items
     
     def to_representation(self, instance):
-        goods_in_pending = Goods.objects.annotate(
-            num_of_goods_pending=Sum(
-                F("goods_ref__goods_quantity"),
-                filter=
-                    Q(goods_ref__issued_status=False)
+        for ins in instance:
+            goods_in_pending = Goods.objects.annotate(
+                num_of_goods_pending=Sum(
+                    F("goods_ref__goods_quantity"),
+                    filter=
+                        Q(goods_ref__issued_status=False)
+                )
+            ).get(id=ins.id)
+            if not goods_in_pending.num_of_goods_pending:
+                goods_in_pending.num_of_goods_pending = 0
+            ins.goods_available_for_sales = (
+                ins.goods_quantity - goods_in_pending.num_of_goods_pending
             )
-        ).get(id=instance.id)
-        if not goods_in_pending.num_of_goods_pending:
-            goods_in_pending.num_of_goods_pending = 0
-        instance.goods_available_for_sales = (
-            instance.goods_quantity - goods_in_pending.num_of_goods_pending
-        )
-        instance.goods_in_pending = goods_in_pending.num_of_goods_pending
+            ins.goods_in_pending = goods_in_pending.num_of_goods_pending
         return super().to_representation(instance)
     
 class GoodsUSerializer(serializers.ModelSerializer):
