@@ -137,7 +137,7 @@ class GoodsSerializer(serializers.ModelSerializer):
                 )
                 ins.goods_in_pending = goods_in_pending.num_of_goods_pending
                 
-        return super().to_representation(instance)
+        return instance
     
 class GoodsUSerializer(serializers.ModelSerializer):
     store=serializers.PrimaryKeyRelatedField(queryset=Store.objects.all())
