@@ -108,7 +108,7 @@ class GoodsSerializer(serializers.ModelSerializer):
 
     
     def to_representation(self, instance):
-        if type(instance) != list:
+        try:
             goods_in_pending = Goods.objects.annotate(
                 num_of_goods_pending=Sum(
                     F("goods_ref__goods_quantity"),
@@ -122,6 +122,8 @@ class GoodsSerializer(serializers.ModelSerializer):
                 instance.goods_quantity - goods_in_pending.num_of_goods_pending
             )
             instance.goods_in_pending = goods_in_pending.num_of_goods_pending
+        except:
+            pass    
         return super().to_representation(instance)
     
 class GoodsUSerializer(serializers.ModelSerializer):
