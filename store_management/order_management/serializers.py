@@ -5,7 +5,6 @@ from django.db.models import Sum, F, Q, Case, When, Value
 from datetime import date
 from stock_management import serializers as stock_serializers
 
-
 class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderStatus
@@ -62,7 +61,7 @@ class OrderSerializer(serializers.ModelSerializer):
             ordered_quantity = order.get("goods_quantity")
             price = order.get("price")
             item = Goods.objects.get(id=goods)
-            if ordered_quantity < item.goods_quantity:
+            if ordered_quantity <= item.goods_quantity:
                 attrs["order_goods"].append(order)
             else:
                 raise serializers.ValidationError(
