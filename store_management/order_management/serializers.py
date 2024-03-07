@@ -265,7 +265,16 @@ class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
         except:
             instance.store=None
         try:
-            instance.goods_type_details=stock_serializer.GoodsTypeSerializer(instance.goods_type).data
+            goods_type=None
+            try:
+                goods_type=stock_serializer.GoodsType.objects.get(id=instance.goods_type.id)
+            except stock_serializer.GoodsType.DoesNotExist:
+                goods_type=None
+            if goods_type:
+                instance.goods_type_details={
+                    "goods_type":goods_type.goods_type,
+                    "company":goods_type.company.company_name
+                }
         except:
             instance.goods_type_details=None
         return super().to_representation(instance)
