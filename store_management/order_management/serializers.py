@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from .models import *
 from django.db.models import Sum, F, Q
 from datetime import date
-from stock_management import serializers as stock_serializers
+from stock_management.serializers  import *
 
 class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
@@ -195,7 +195,7 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
             else:
                 quantity = quantity
 
-            updated_stock = stock_serializers.UpdateStockSerializer(
+            updated_stock = UpdateStockSerializer(
                 data={
                     "update": [{"goods": instance.goods.id, "quantity_added": quantity}]
                 }
@@ -235,8 +235,8 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
 
 
 class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
-    store_details=stock_serializers.StoreSerializer(read_only=True,source='store')
-    goods_type=serializers.SlugRelatedField(slug_field='goods_type',queryset=stock_serializers.GoodsType.objects.all())
+    store_details=StoreSerializer(read_only=True,source='store')
+    goods_type=serializers.SlugRelatedField(slug_field='goods_type',queryset=GoodsType.objects.all())
     goods_in_pending = serializers.IntegerField(read_only=True)
     goods_available_for_sales = serializers.IntegerField(read_only=True)
 
@@ -293,7 +293,7 @@ class DeleteOrderSerializer(serializers.Serializer):
                 for goods in order_goods:
                     if goods.issued_status:
                         goods_to_be_updated.append(
-                            stock_serializers.GoodsUpdate(
+                            GoodsUpdate(
                                 goods=goods.goods,
                                 updated_by=get_user_model().objects.get(id=data["deleted_by"]),
                                 quantity_available=goods.goods.goods_quantity+goods.goods_quantity,
@@ -310,7 +310,7 @@ class DeleteOrderSerializer(serializers.Serializer):
 
                 try:
                     # saving an update to stock
-                    stock_updates = stock_serializers.GoodsUpdate.objects.bulk_create(
+                    stock_updates = GoodsUpdate.objects.bulk_create(
                         goods_to_be_updated
                     )
                     
