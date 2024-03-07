@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404
 from .models import *
 from django.db.models import Sum, F, Q
 from datetime import date
-from stock_management.serializers  import *
+from stock_management import serializers as stock_serializer
 
 class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
@@ -195,7 +195,7 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
             else:
                 quantity = quantity
 
-            updated_stock = UpdateStockSerializer(
+            updated_stock = stock_serializer.UpdateStockSerializer(
                 data={
                     "update": [{"goods": instance.goods.id, "quantity_added": quantity}]
                 }
@@ -235,8 +235,8 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
 
 
 class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
-    store_details=StoreSerializer(read_only=True,source='store')
-    goods_type_details=GoodsTypeSerializer(read_only=True,source='goods_type')
+    store_details=serializers.JSONField(read_only=True)
+    goods_type_details=serializers.JSONField(read_only=True)
     goods_in_pending = serializers.IntegerField(read_only=True)
     goods_available_for_sales = serializers.IntegerField(read_only=True)
 
@@ -260,6 +260,14 @@ class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
             instance.goods_quantity - goods_in_pending.num_of_goods_pending
         )
         instance.goods_in_pending = goods_in_pending.num_of_goods_pending
+        try:
+            instance.store_details=stock_serializer.StoreSerializer(instance.store).data
+        except:
+            instance.store=None
+        try:
+            instance.goods_type_details=stock_serializer.GoodsTypeSerializer(instance.goods_type).data
+        except:
+            instance.goods_type_details=None
         return super().to_representation(instance)
 
 
@@ -293,7 +301,7 @@ class DeleteOrderSerializer(serializers.Serializer):
                 for goods in order_goods:
                     if goods.issued_status:
                         goods_to_be_updated.append(
-                            GoodsUpdate(
+                            stock_serializer.GoodsUpdate(
                                 goods=goods.goods,
                                 updated_by=get_user_model().objects.get(id=data["deleted_by"]),
                                 quantity_available=goods.goods.goods_quantity+goods.goods_quantity,
@@ -310,7 +318,7 @@ class DeleteOrderSerializer(serializers.Serializer):
 
                 try:
                     # saving an update to stock
-                    stock_updates = GoodsUpdate.objects.bulk_create(
+                    stock_updates = stock_serializer.GoodsUpdate.objects.bulk_create(
                         goods_to_be_updated
                     )
                     
