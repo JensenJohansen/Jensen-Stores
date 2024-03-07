@@ -248,10 +248,8 @@ class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
         goods_in_pending = Goods.objects.annotate(
             num_of_goods_pending=Sum(
                 F("goods_ref__goods_quantity"),
-                filter=Q(
+                 filter=
                     Q(goods_ref__issued_status=False)
-                    | Q(goods_ref__date_added__contains=date.today())
-                ),
             )
         ).get(id=instance.id)
         if not goods_in_pending.num_of_goods_pending:
