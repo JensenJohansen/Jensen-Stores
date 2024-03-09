@@ -14,6 +14,9 @@ class GoodsTypeCreateAPIView(ListCreateAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated, IsShopOwner]
     
+    def perform_create(self, serializer):
+        return serializer.save(company=self.request.user.user_company)
+    
     def get(self, request, *args, **kwargs):
         user_company = request.user.user_company
         filtered_data =  self.get_queryset().filter(company=user_company)

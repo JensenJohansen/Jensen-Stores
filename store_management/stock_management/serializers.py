@@ -123,7 +123,25 @@ class GoodsSerializer(serializers.ModelSerializer):
             )
             instance.goods_in_pending = goods_in_pending.num_of_goods_pending
         except:
-            pass    
+            inst=[]
+            for goods in instance:
+                goods_in_pending = Goods.objects.annotate(
+                    num_of_goods_pending=Sum(
+                        F("goods_ref__goods_quantity"),
+                        filter=
+                            Q(goods_ref__issued_status=False)
+                    )
+                ).get(id=goods.id)
+                if not goods_in_pending.num_of_goods_pending:
+                    goods_in_pending.num_of_goods_pending = 0
+                goods.goods_available_for_sales = (
+                    goods.goods_quantity - goods_in_pending.num_of_goods_pending
+                )
+                goods.goods_in_pending = goods_in_pending.num_of_goods_pending   
+                inst.append(goods)
+            instance=inst
+            return instance
+   
         return super().to_representation(instance)
     
 class GoodsUSerializer(serializers.ModelSerializer):
