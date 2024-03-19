@@ -170,7 +170,11 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         return attrs
     
     def validate_old_password(self, value):
-        user = self.context['request'].user
+        #user = self.context['request'].user, now only the userId passed on Url is enough and important for changing the password
+        userId = int(self.context['request']._request.path.split('/')[-2])
+        print(userId)
+        user=AppUser.objects.get(id=userId)
+        print(user)
         if not user.check_password(value):
             raise serializers.ValidationError({"old password":"you entered wrong old password"})
         return value

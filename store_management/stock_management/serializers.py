@@ -109,20 +109,6 @@ class GoodsSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         try:
-            goods_in_pending = Goods.objects.annotate(
-                num_of_goods_pending=Sum(
-                    F("goods_ref__goods_quantity"),
-                    filter=
-                        Q(goods_ref__issued_status=False)
-                )
-            ).get(id=instance.id)
-            if not goods_in_pending.num_of_goods_pending:
-                goods_in_pending.num_of_goods_pending = 0
-            instance.goods_available_for_sales = (
-                instance.goods_quantity - goods_in_pending.num_of_goods_pending
-            )
-            instance.goods_in_pending = goods_in_pending.num_of_goods_pending
-        except:
             inst=[]
             for goods in instance:
                 goods_in_pending = Goods.objects.annotate(
@@ -140,7 +126,21 @@ class GoodsSerializer(serializers.ModelSerializer):
                 goods.goods_in_pending = goods_in_pending.num_of_goods_pending   
                 inst.append(goods)
             instance=inst
-            return instance
+        except:
+            goods_in_pending = Goods.objects.annotate(
+                num_of_goods_pending=Sum(
+                    F("goods_ref__goods_quantity"),
+                    filter=
+                        Q(goods_ref__issued_status=False)
+                )
+            ).get(id=instance.id)
+            if not goods_in_pending.num_of_goods_pending:
+                goods_in_pending.num_of_goods_pending = 0
+            instance.goods_available_for_sales = (
+                instance.goods_quantity - goods_in_pending.num_of_goods_pending
+            )
+            instance.goods_in_pending = goods_in_pending.num_of_goods_pending
+            
    
         return super().to_representation(instance)
     
@@ -253,7 +253,7 @@ class LeakageSerializer(serializers.ModelSerializer):
         goods_available = good['goods_available_for_sales']
         
         if amount_broken <= goods_available.value:
-            raise serializers.ValidationError({"amount":"The amount is higher than the available goods"})
+            raise serializers.ValidationError({"amount_broken":"The amount is higher than the available goods"})
         return attrs
     
     def create(self, validated_data):
