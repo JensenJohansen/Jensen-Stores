@@ -1,13 +1,11 @@
+from datetime import datetime
 from rest_framework import serializers
 from .models import *
 from django.db.models import F, Q,Sum
-from datetime import date
 from order_management.models import Order, GoodsOrder
 from order_management import serializers as order_serializers
 from user_management.models import Company
-from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
-from rest_framework import status
+from django.db import transaction
 
 class StoreSerializer(serializers.ModelSerializer):
     """
@@ -58,153 +56,161 @@ class StoreSerializer(serializers.ModelSerializer):
         return instance
 
 
+class LeakageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Leakage
+        fields = "__all__"
+        read_only_fields = ['added_by']
+    
+    def validate(self, attrs):
+        amount_broken = attrs.get("amount_broken")
+        good = attrs.get('goods')
+        good = GoodsSerializer(good)
+        goods_available = good['goods_available_for_sales']
+        
+        if amount_broken > goods_available.value:
+            raise serializers.ValidationError({"amount":"The amount is higher than the available goods"})
+        return attrs
+    
+    def create(self, validated_data):
+        goods = validated_data.get('goods')
+        amount_broken = validated_data.get('amount_broken')
+        if validated_data['leakage_summary']:
+            leakage_summary = validated_data.get('leakage_summary')
+        added_by = validated_data.get("added_by")
+        
+        goods_update = UpdateStockSerializer(
+                data={
+                    
+                        "goods":goods.id,
+                        "quantity_added": -amount_broken,
+                        "goods_update_reason":"broken_stock"
+                    
+                    }
+                )
+        if goods_update.is_valid(raise_exception=True):
+                goods_update.save(updated_by=self.context.get('request').user)
+        return super().create(validated_data)
+    
+
 class GoodsSerializer(serializers.ModelSerializer):
-    """
-    A serializer for adding goods to the specific store for the first time
-    """
-    store_details=StoreSerializer(read_only=True,source='store')
-    goods_type=serializers.SlugRelatedField(slug_field='goods_type', read_only=True)
-    store=serializers.SlugRelatedField(slug_field='store_name', read_only=True)
-    added_by = serializers.SlugRelatedField(slug_field="username", read_only=True,)
-    goods = serializers.JSONField(write_only=True)
+    broken=LeakageSerializer(many=True,read_only=True)
+    store_details = StoreSerializer(read_only=True, source='store')
+    goods_type = serializers.SlugRelatedField(slug_field='goods_type',queryset=GoodsType.objects.all())
+    store = serializers.SlugRelatedField(slug_field='store_name',queryset=Store.objects.all())
+    added_by = serializers.SlugRelatedField(slug_field="username",read_only=True)
     goods_in_pending = serializers.IntegerField(read_only=True)
     goods_available_for_sales = serializers.IntegerField(read_only=True)
     
     class Meta:
-        model=Goods
-        fields='__all__'
-        read_only_fields=['goods_name', 'goods_number', 'goods_quantity', 'lower_price_margin', 'buying_price']
-    
-    def create(self, validated_data):
-        goods = validated_data.pop('goods')
-        added_by = validated_data['added_by']
-        items = []
-        for item in goods:
-            goods_type = item.pop('goods_type')
-            store = item.pop('store')
-            try:
-                goods_type = GoodsType.objects.get(goods_type=goods_type)
-            except Exception as e:
-                raise(e)
-            try: 
-                store = get_object_or_404(Store, store_name=store)
-            except Exception as e:
-                raise(e)
-            
-            try:
-                added_goods = Goods.objects.get(goods_number=item.goods_number)
-            except:
-                pass
-            
-            item = Goods(
-                goods_type=goods_type,
-                store=store,
-                added_by=added_by,
-                **item
-                )
-            items.append(item)
-        created_items = Goods.objects.bulk_create(items)
-        return created_items
+        model = Goods
+        read_only_fields=['date_updated','time_updated',]
+        exclude=['update_url']
 
-    
     def to_representation(self, instance):
-        try:
-            inst=[]
+        if isinstance(instance, list):
             for goods in instance:
-                goods_in_pending = Goods.objects.annotate(
-                    num_of_goods_pending=Sum(
-                        F("goods_ref__goods_quantity"),
-                        filter=
-                            Q(goods_ref__issued_status=False)
-                    )
-                ).get(id=goods.id)
-                if not goods_in_pending.num_of_goods_pending:
-                    goods_in_pending.num_of_goods_pending = 0
-                goods.goods_available_for_sales = (
-                    goods.goods_quantity - goods_in_pending.num_of_goods_pending
-                )
-                goods.goods_in_pending = goods_in_pending.num_of_goods_pending   
-                inst.append(goods)
-            instance=inst
-        except:
+                self._annotate_goods_in_pending(goods)
+        else:
+            self._annotate_goods_in_pending(instance)
+
+        return super().to_representation(instance)
+    
+    def _annotate_goods_in_pending(self, goods):
+        try:
             goods_in_pending = Goods.objects.annotate(
                 num_of_goods_pending=Sum(
                     F("goods_ref__goods_quantity"),
-                    filter=
-                        Q(goods_ref__issued_status=False)
+                    filter=Q(goods_ref__issued_status=False)
                 )
-            ).get(id=instance.id)
-            if not goods_in_pending.num_of_goods_pending:
-                goods_in_pending.num_of_goods_pending = 0
-            instance.goods_available_for_sales = (
-                instance.goods_quantity - goods_in_pending.num_of_goods_pending
-            )
-            instance.goods_in_pending = goods_in_pending.num_of_goods_pending
-            
-   
-        return super().to_representation(instance)
+            ).get(id=goods.id)
+            goods.goods_available_for_sales = goods.goods_quantity - int(goods_in_pending.num_of_goods_pending if goods_in_pending.num_of_goods_pending is not None else 0)
+            goods.goods_in_pending = goods_in_pending.num_of_goods_pending if goods_in_pending.num_of_goods_pending is not None else 0
+        except Goods.DoesNotExist:
+            goods.goods_available_for_sales = goods.goods_quantity
+            goods.goods_in_pending = 0
     
-class GoodsUSerializer(serializers.ModelSerializer):
-    store=serializers.PrimaryKeyRelatedField(queryset=Store.objects.all())
-    goods_type=serializers.PrimaryKeyRelatedField(queryset=GoodsType.objects.all())
-    added_by=serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
-    class Meta:
-        model = Goods
-        fields = '__all__'
-        read_only_fields=['goods_quantity',]
+    def get_fields(self):
+        fields = super().get_fields()
+        # Check if the serializer is being used for creating or updating
+        if self.instance is None:
+            # Serializer is used for creating objects
+            fields['goods_quantity'].read_only = False
+            
+        else:
+            # Serializer is used for updating objects
+            fields['goods_quantity'].read_only = True
+        return fields
+      
+    def update(self, instance, validated_data):
+        '''Override update method to set date_updated and time_updated'''
+        request = self.context.get('request')  # Get request object from context
+        if request:
+            request_url = request.build_absolute_uri()  # Get request URL
+            instance.update_url = request_url
+        instance.goods_name = validated_data.get('goods_name', instance.goods_name)
+        instance.goods_type = validated_data.get('goods_type', instance.goods_type)
+        instance.buying_price = validated_data.get('buying_price', instance.buying_price)
+        instance.lower_price_margin = validated_data.get('lower_price_margin', instance.lower_price_margin)
+        instance.store = validated_data.get('store', instance.store)
+        instance.goods_number = validated_data.get('goods_number', instance.goods_number)
+        # Set date_updated and time_updated to current datetime
+        instance.date_updated = datetime.now().date()
+        instance.time_updated = datetime.now().time()
+        instance.save()
+        return instance
         
 
 class UpdateStockSerializer(serializers.ModelSerializer):
     """
     A serializer for updating stock(goods) when issuing or adding new stock
     """
-    goods=serializers.PrimaryKeyRelatedField(read_only=True)
-    updated_by=serializers.SlugRelatedField(slug_field='username', read_only=True)
-    balance=serializers.IntegerField(read_only=True)
-    update = serializers.JSONField(write_only=True)
+    goods = serializers.PrimaryKeyRelatedField(queryset=Goods.objects.all())
+    updated_by = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    balance = serializers.IntegerField(read_only=True)
     
     class Meta:
-        model=GoodsUpdate
-        fields= '__all__'
-        read_only_fields=('quantity_available', 'quantity_added',)
+        model = GoodsUpdate
+        fields = '__all__'
+        read_only_fields=['quantity_available',]
         
-    """def to_representation(self, instance):
-        if isinstance(instance, list):
-            return instance
-        instance.balance=instance.quantity_available+instance.quantity_added    
-        return instance"""
-    
     def create(self, validated_data):
-        """
-        Purpose: update stock adds a goods or issue stock
-        """
-        user=validated_data.pop('updater')
-        validated_data = validated_data['update']
+        goods = validated_data.pop('goods')
         
-        goods_update = []
-        for item in validated_data:
-            goods=item.pop('goods')
-            
-            try:
-                goods=Goods.objects.get(id=goods)
-                quantity_available=goods.goods_quantity
-            except Goods.DoesNotExist:
-                raise serializers.ValidationError({"goods":"goods you entered Does not Exist"})
-            try:
-                updated_goods=GoodsUpdate(
-                    **item,
-                    goods=goods,
-                    updated_by=get_user_model().objects.get(username=user),
-                    quantity_available=quantity_available
-                    )
-                goods.goods_quantity=quantity_available+item['quantity_added']
+        # get request user
+        request=self.context.get('request')
+        
+        if request:
+            request_user=request.user
+        else:
+            request_user=validated_data['updated_by']
+        
+        try:
+            goods = Goods.objects.get(id=goods.id)
+            quantity_available = goods.goods_quantity
+        except Goods.DoesNotExist:
+            raise serializers.ValidationError({"goods": "The goods you entered do not exist."})
+        
+        try:
+            with transaction.atomic():
+                goods_quantity = quantity_available + validated_data['quantity_added']
+                goods.goods_quantity = goods_quantity
                 goods.save()
-                goods_update.append(updated_goods)
-            except Exception as e:
+                
+                goods_update = GoodsUpdate.objects.create(
+                    goods=goods,
+                    updated_by=request_user,
+                    quantity_available=quantity_available,
+                    quantity_added=validated_data['quantity_added'],
+                    goods_update_reason=validated_data['goods_update_reason'] if validated_data['goods_update_reason'] else "updated_stock"
+                )
+        except Exception as e:
                 raise e
-        goods_update = GoodsUpdate.objects.bulk_create(goods_update)
         return goods_update
-
+    def to_representation(self, instance):
+        instance.balance=instance.quantity_available+instance.quantity_added
+        return super().to_representation(instance)
+    
 
 class OrderIssueSerializer(serializers.Serializer):
     issued_status = serializers.BooleanField()
@@ -240,38 +246,3 @@ class GoodsTypeSerializer(serializers.ModelSerializer):
         fields='__all__'
         
 
-class LeakageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Leakage
-        fields = "__all__"
-        read_only_fields = ['added_by']
-    
-    def validate(self, attrs):
-        amount_broken = attrs.get("amount_broken")
-        good = attrs.get('goods')
-        good = order_serializers.GoodsAvailableForSalesSerializer(good)
-        goods_available = good['goods_available_for_sales']
-        
-        if amount_broken <= goods_available.value:
-            raise serializers.ValidationError({"amount_broken":"The amount is higher than the available goods"})
-        return attrs
-    
-    def create(self, validated_data):
-        goods = validated_data.get('goods')
-        amount_broken = validated_data.get('amount_broken')
-        leakage_summery = validated_data.get('leakage_summery')
-        added_by = validated_data.get("added_by")
-        
-        goods_update = UpdateStockSerializer(
-                data={
-                    "update": [
-                        {
-                        "goods":goods.id,
-                        "quantity_added": -amount_broken
-                        }
-                        ]
-                    }
-                )
-        if goods_update.is_valid(raise_exception=True):
-                goods_update.save(updater=added_by.username)
-        return super().create(validated_data)

@@ -65,6 +65,9 @@ class Goods(models.Model):
     lower_price_margin=models.FloatField(_("Lowest price of a product"),validators=[validate_value])
     store=models.ForeignKey(Store, verbose_name=_("store goods found"),related_name='store', on_delete=models.DO_NOTHING)
     added_by=models.ForeignKey(get_user_model(), verbose_name=_("User who added goods"), on_delete=models.DO_NOTHING)
+    date_updated=models.DateField(_("Date updated"),null=True,blank=True)
+    time_updated=models.TimeField(_("Time updated"),null=True,blank=True)
+    update_url=models.TextField(_("URL which updated goods"),null=True,blank=True)
     date_added=models.DateTimeField(_("date goods added"), auto_now=True)
     
     class Meta:
@@ -79,9 +82,11 @@ class Goods(models.Model):
 
 class GoodsUpdate(models.Model):
     choice_order=[
-        'deleted_order','Deleted Order',
-        'issued_order', 'Issued Order',
-        'updated_stock','Updated Stock'
+        ('deleted_order','Deleted Order'),
+        ('issued_order', 'Issued Order'),
+        ('updated_stock','Updated Stock'),
+        ('broken_stock','Broken Stock'),
+        ('restocked_broken','Broken Return')
     ]
     
     goods=models.ForeignKey(Goods, verbose_name=_("Goods to be updated"), on_delete=models.CASCADE)
@@ -89,7 +94,7 @@ class GoodsUpdate(models.Model):
     quantity_available=models.IntegerField(_("Quantity available"))
     quantity_added=models.IntegerField(_("Quantity added"))
     updated_on=models.DateField(_("Date goods updated"), auto_now=True)
-    goods_update_reason=models.CharField(_("reason for Update"), max_length=30,default='updated_stock')
+    goods_update_reason=models.CharField(_("reason for Update"),choices=choice_order,max_length=30,default='updated_stock')
     
     class Meta:
         verbose_name = 'GoodsUpdate'
@@ -100,9 +105,9 @@ class Leakage(models.Model):
     """
     A model that define the leaked or broken goods in the company
     """
-    goods = models.ForeignKey(Goods, verbose_name=_("broken goods"), on_delete=models.CASCADE)
+    goods = models.ForeignKey(Goods, verbose_name=_("broken goods"),related_name='broken', on_delete=models.CASCADE)
     amount_broken = models.IntegerField(_("how many that broke"))
-    leakage_summery = models.CharField(_("leakage summery"), max_length=150)
+    leakage_summary = models.CharField(_("leakage summary"), max_length=150,null=True,blank=True)
     broken_date = models.DateTimeField(_("Date for the leakage"), auto_now=True, auto_now_add=False)
     added_by = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
     

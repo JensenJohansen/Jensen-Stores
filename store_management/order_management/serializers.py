@@ -178,60 +178,45 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
             "goods",
             "issuer",
         ]
-
+        
     def update(self, instance, validated_data):
-        instance.issuer = validated_data.get("issuer", instance.issuer)
-        validated_data = validated_data["goods_issue"]
-        issued_status = validated_data.get("issued_status")
+        # Extract goods_issue data from validated_data
+        goods_issue_data = validated_data.pop('goods_issue', None)
 
-        if instance.issued_status != issued_status:
-            instance.goods_quantity = validated_data.get(
-                "goods_quantity", instance.goods_quantity
-            )
-            quantity = instance.goods_quantity
+        if goods_issue_data:
+            # Get issued_status from goods_issue_data or use the current instance's value
+            issued_status = goods_issue_data.get('issued_status', instance.issued_status)
+            if instance.issued_status != issued_status:
+                # Update instance's issued_status and goods_quantity if changed
+                instance.issued_status = issued_status
+                instance.goods_quantity = goods_issue_data.get('goods_quantity', instance.goods_quantity)
 
-            if issued_status:
-                quantity = -quantity
-            else:
-                quantity = quantity
-
-            updated_stock = stock_serializer.UpdateStockSerializer(
-                data={
-                    "update": [{"goods": instance.goods.id, "quantity_added": quantity}]
-                }
-            )
-
-            if updated_stock.is_valid(raise_exception=True):
-                updated_stock.save(updater=instance.issuer.username)
-
-            instance.issued_status = issued_status
-
-            # changing the status of the order_issued_status everytime changes happen to single goodsorder
-            completion = []
-            order_goods = instance.order.order_goods.all()
-            for item in order_goods:
-                if item.id != instance.id:
-                    status = item.issued_status
-                    completion.append(status)
+                # Update stock quantity based on the issued_status change
+                if instance.issued_status:
+                    quantity = -instance.goods_quantity
                 else:
-                    status = issued_status
-                    completion.append(status)
-            if False in completion:
-                instance.order.issued_status = False
-                instance.order.save()
-            else:
-                instance.order.issued_status = True
-                instance.order.save()
+                    quantity = instance.goods_quantity
 
-        if not instance.issued_status:
-            if instance.order.authorization_status.status != "paid":
-                instance.price = validated_data.get("price", instance.price)
-                instance.goods_quantity = validated_data.get(
-                    "goods_quantity", instance.goods_quantity
-                )
+                # Serialize stock update data and save it
+                stock_data = {'update': [{'goods': instance.goods.id, 'quantity_added': quantity}]}
+                stock_serializer = stock_serializer.UpdateStockSerializer(data=stock_data)
+                if stock_serializer.is_valid():
+                    stock_serializer.save(updater=instance.issuer.username)
 
-        instance.save()
+                # Update order issued status based on all items' issued_status in the order
+                order = instance.order
+                order.issued_status = all(item.issued_status for item in order.order_goods.all())
+                order.save()
+
+        # Update other fields if not issued and the order is not paid
+        if not instance.issued_status and instance.order.authorization_status.status != 'paid':
+            instance.price = validated_data.get('price', instance.price)
+
+        # Call the superclass's update method to save the instance with updated data
+        instance.save()  # Save the instance to persist the changes to the database
         return instance
+    
+
 
 
 class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
