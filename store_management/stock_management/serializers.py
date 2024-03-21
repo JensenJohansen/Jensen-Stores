@@ -154,6 +154,7 @@ class GoodsSerializer(serializers.ModelSerializer):
         instance.lower_price_margin = validated_data.get('lower_price_margin', instance.lower_price_margin)
         instance.store = validated_data.get('store', instance.store)
         instance.goods_number = validated_data.get('goods_number', instance.goods_number)
+        instance.restricted_price = validated_data.get('restricted_price', instance.restricted_price)
         # Set date_updated and time_updated to current datetime
         instance.date_updated = datetime.now().date()
         instance.time_updated = datetime.now().time()
@@ -212,13 +213,6 @@ class UpdateStockSerializer(serializers.ModelSerializer):
         return super().to_representation(instance)
     
 
-class OrderIssueSerializer(serializers.Serializer):
-    issued_status = serializers.BooleanField()
-    class Meta:
-        model = Order
-        fields = '__all__'
-
-
 class GoodsIssueSerializer(serializers.ModelSerializer):
     issuer = serializers.SlugRelatedField(slug_field='username', queryset=get_user_model().objects.all())
     class Meta:
@@ -230,7 +224,7 @@ class GoodsIssueSerializer(serializers.ModelSerializer):
         instance.issuer = validated_data.get('issuer', instance.issuer)
         
         if not instance.issued_status:
-            updated_stock = UpdateStockSerializer(data={"updated_by":instance.issuer, "goods":instance.goods.id, "quantity_added":-instance.goods_quantity})
+            updated_stock = UpdateStockSerializer(data={"request_user":instance.issuer, "goods":instance.goods.id, "quantity_added":-instance.goods_quantity})
             if updated_stock.is_valid():
                 updated_stock.save()      
         

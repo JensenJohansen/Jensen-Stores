@@ -68,11 +68,11 @@ class OrderSerializer(serializers.ModelSerializer):
                     "Goods_quantity: you entered more orders than the quantity available"
                 )
                 
-            #deprecated
-            """if price < item.lower_price_margin:
+            #This check if you have limited your price to not go below lower price margin
+            if price < item.lower_price_margin and item.restricted_price:
                 raise serializers.ValidationError(
                     "Price: Please consider lower price margin"
-                )"""
+                )
 
         return attrs
 
@@ -182,8 +182,9 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         # Extract goods_issue data from validated_data
         goods_issue_data = validated_data.pop('goods_issue', None)
-
         if goods_issue_data:
+            issuer = self.instance.issuer if self.instance.issuer is not None else self.context.get('request').user
+            
             # Get issued_status from goods_issue_data or use the current instance's value
             issued_status = goods_issue_data.get('issued_status', instance.issued_status)
             if instance.issued_status != issued_status:
@@ -193,15 +194,23 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
 
                 # Update stock quantity based on the issued_status change
                 if instance.issued_status:
-                    quantity = -instance.goods_quantity
+                    goods=stock_serializer.GoodsSerializer(get_object_or_404(Goods,id=instance.goods.id)).data
+                    
+                    if instance.goods_quantity <= goods['goods_available_for_sales']:
+                        quantity = -instance.goods_quantity
+                    else:
+                        raise ValueError("The number exceed the amount available")
+                    
+                    instance.issuer=issuer
                 else:
                     quantity = instance.goods_quantity
 
                 # Serialize stock update data and save it
-                stock_data = {'update': [{'goods': instance.goods.id, 'quantity_added': quantity}]}
-                stock_serializer = stock_serializer.UpdateStockSerializer(data=stock_data)
-                if stock_serializer.is_valid():
-                    stock_serializer.save(updater=instance.issuer.username)
+                stock_data = {'goods': instance.goods.id, 'quantity_added': quantity,'goods_update_reason':'issued_order'}
+                stock_serial = stock_serializer.UpdateStockSerializer(data=stock_data)
+                
+                if stock_serial.is_valid():
+                    stock_serial.save(updated_by=issuer)
 
                 # Update order issued status based on all items' issued_status in the order
                 order = instance.order
@@ -216,51 +225,6 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
         instance.save()  # Save the instance to persist the changes to the database
         return instance
     
-
-
-
-class GoodsAvailableForSalesSerializer(serializers.ModelSerializer):
-    store_details=serializers.JSONField(read_only=True)
-    goods_type_details=serializers.JSONField(read_only=True)
-    goods_in_pending = serializers.IntegerField(read_only=True)
-    goods_available_for_sales = serializers.IntegerField(read_only=True)
-
-    class Meta:
-        model = Goods
-        fields = "__all__"
-
-    def to_representation(self, instance):
-        goods_in_pending = Goods.objects.annotate(
-            num_of_goods_pending=Sum(
-                F("goods_ref__goods_quantity"),
-                 filter=
-                    Q(goods_ref__issued_status=False)
-            )
-        ).get(id=instance.id)
-        if not goods_in_pending.num_of_goods_pending:
-            goods_in_pending.num_of_goods_pending = 0
-        instance.goods_available_for_sales = (
-            instance.goods_quantity - goods_in_pending.num_of_goods_pending
-        )
-        instance.goods_in_pending = goods_in_pending.num_of_goods_pending
-        try:
-            instance.store_details=stock_serializer.StoreSerializer(instance.store).data
-        except:
-            instance.store=None
-        try:
-            goods_type=None
-            try:
-                goods_type=stock_serializer.GoodsType.objects.get(id=instance.goods_type.id)
-            except stock_serializer.GoodsType.DoesNotExist:
-                goods_type=None
-            if goods_type:
-                instance.goods_type_details={
-                    "goods_type":goods_type.goods_type,
-                    "company":goods_type.company.company_name
-                }
-        except:
-            instance.goods_type_details=None
-        return super().to_representation(instance)
 
 
 class DeletedOrderSerializer(serializers.ModelSerializer):

@@ -169,14 +169,6 @@ class LeastStockGoodsListAPIView(ListAPIView):
         return queryset
 
 
-class OrderIssueCreateAPIView(CreateAPIView):
-    QuerySet = Order.objects.all()
-    serializer_class = OrderIssueSerializer
-    permission_classes = [
-        IsAuthenticated,
-    ]
-    authentication_classes = [BasicAuthentication, TokenAuthentication]
-
 
 class GoodsOrderIssueListView(ListAPIView):
     queryset = GoodsOrder.objects.all()

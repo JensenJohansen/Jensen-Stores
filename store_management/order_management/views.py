@@ -76,31 +76,6 @@ class GoodsOrderUpdateAPIView(RetrieveUpdateDestroyAPIView):
         return serializer.save(issuer=self.request.user)
 
 
-class GoodsAvailableListView(ListAPIView):
-    queryset = Goods.objects.all().order_by("-id")
-    serializer_class = GoodsAvailableForSalesSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    
-    def get(self, request, *args, **kwargs):
-        user = request.user.user_company
-        user_company = get_user_model().objects.filter(user_company=user)
-        filtered_data = self.get_queryset().filter(added_by__in=user_company)
-        serializer = self.serializer_class(filtered_data, many=True)
-        serialized_data = serializer.data
-        return Response({
-            "count": len(serialized_data),
-            "results": serialized_data
-        })
-
-class GoodsAvailableRetrieveAPIView(RetrieveAPIView):
-    queryset = Goods.objects.all()
-    serializer_class = GoodsAvailableForSalesSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    lookup_field = "id"
-    
-
 class DeleteOrderCreateAPIView(CreateAPIView):
     serializer_class = DeleteOrderSerializer
     

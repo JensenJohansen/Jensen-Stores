@@ -65,6 +65,7 @@ class Goods(models.Model):
     lower_price_margin=models.FloatField(_("Lowest price of a product"),validators=[validate_value])
     store=models.ForeignKey(Store, verbose_name=_("store goods found"),related_name='store', on_delete=models.DO_NOTHING)
     added_by=models.ForeignKey(get_user_model(), verbose_name=_("User who added goods"), on_delete=models.DO_NOTHING)
+    restricted_price=models.BooleanField(_("The limited lower price"),default=True)
     date_updated=models.DateField(_("Date updated"),null=True,blank=True)
     time_updated=models.TimeField(_("Time updated"),null=True,blank=True)
     update_url=models.TextField(_("URL which updated goods"),null=True,blank=True)
