@@ -266,7 +266,7 @@ class DeleteOrderSerializer(serializers.Serializer):
                             )
                         )
                         try:
-                            Goods.objects.update(goods_quantity=goods.goods.goods_quantity+goods.goods_quantity)
+                            Goods.objects.update(Q(goods_quantity=goods.goods.goods_quantity+goods.goods_quantity)&Q(id=goods.goods.id))
                         except:
                             print('failed to update the goods number')
                         
