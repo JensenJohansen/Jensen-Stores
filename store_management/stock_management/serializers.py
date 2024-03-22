@@ -155,6 +155,7 @@ class GoodsSerializer(serializers.ModelSerializer):
         instance.store = validated_data.get('store', instance.store)
         instance.goods_number = validated_data.get('goods_number', instance.goods_number)
         instance.restricted_price = validated_data.get('restricted_price', instance.restricted_price)
+        instance.alert_on_goods_quantity = validated_data.get('alert_on_goods_quantity', instance.alert_on_goods_quantity)
         # Set date_updated and time_updated to current datetime
         instance.date_updated = datetime.now().date()
         instance.time_updated = datetime.now().time()
