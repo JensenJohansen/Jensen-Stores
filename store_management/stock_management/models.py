@@ -95,7 +95,7 @@ class GoodsUpdate(models.Model):
     quantity_available=models.IntegerField(_("Quantity available"))
     quantity_added=models.IntegerField(_("Quantity added"))
     updated_on=models.DateField(_("Date goods updated"), auto_now=True)
-    goods_update_reason=models.CharField(_("reason for Update"),choices=choice_order,max_length=30,default='updated_stock')
+    goods_update_reason=models.CharField(_("reason for Update"),choices=choice_order,max_length=30,default='updated_stock',null=True,blank=True)
     
     class Meta:
         verbose_name = 'GoodsUpdate'
