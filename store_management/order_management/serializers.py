@@ -196,7 +196,7 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
                 if instance.issued_status:
                     goods=stock_serializer.GoodsSerializer(get_object_or_404(Goods,id=instance.goods.id)).data
                     
-                    if instance.goods_quantity <= goods['goods_available_for_sales']:
+                    if instance.goods_quantity <= goods['goods_quantity']:
                         quantity = -instance.goods_quantity
                     else:
                         raise ValueError("The number exceed the amount available")
