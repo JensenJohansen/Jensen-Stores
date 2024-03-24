@@ -97,10 +97,22 @@ class GoodsUpdate(models.Model):
     quantity_added=models.IntegerField(_("Quantity added"))
     updated_on=models.DateField(_("Date goods updated"), auto_now=True)
     goods_update_reason=models.CharField(_("reason for Update"),choices=choice_order,max_length=30,default='updated_stock',null=True,blank=True)
+    authorized_by=models.ForeignKey(get_user_model(),related_name='update_authorizer', verbose_name=_("Authorizer of update"), on_delete=models.SET_NULL,null=True,blank=True)
     
     class Meta:
         verbose_name = 'GoodsUpdate'
         verbose_name_plural = 'GoodsUpdates'
+
+class TemporaryGoodsUpdate(models.Model):
+    
+    goods=models.ForeignKey(Goods, verbose_name=_("Goods to be updated"), on_delete=models.CASCADE)
+    updated_by=models.ForeignKey(get_user_model(), verbose_name=_("User who updated goods"), on_delete=models.DO_NOTHING)
+    quantity_added=models.IntegerField(_("Quantity added"))
+    updated_on=models.DateField(_("Date goods updated"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("TemporaryGoodsUpdate")
+        verbose_name_plural = _("TemporaryGoodsUpdates")
 
 
 class Leakage(models.Model):

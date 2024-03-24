@@ -1,14 +1,12 @@
-from django.shortcuts import render
 from rest_framework.generics import *
 from knox.auth import TokenAuthentication
-from rest_framework.authentication import BasicAuthentication, SessionAuthentication
+from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import (
     IsAuthenticated,
-    AllowAny,
-    IsAuthenticatedOrReadOnly,
 )
+from rest_framework.decorators import action
 from rest_framework.status import *
-from django.db.models import F, Count
+from django.db.models import F
 from .serializers import *
 from user_management.permissions import *
 from rest_framework.response import Response
@@ -122,13 +120,13 @@ class UpdateStockListCreateAPIView(ListCreateAPIView):
         serializer = self.serializer_class(filtered_data, many=True)
         serialized_data = serializer.data
         return Response({"count": len(serialized_data), "results": serialized_data})
-    
+
     def post(self, request, *args, **kwargs):
         is_many = isinstance(request.data, list)
 
         serializer = self.get_serializer(data=request.data, many=is_many)
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
+            serializer.save(goods_update_reason='updated_stock')
         headers = self.get_success_headers(serializer.data)
         return Response(
             {
@@ -169,7 +167,6 @@ class LeastStockGoodsListAPIView(ListAPIView):
         return queryset
 
 
-
 class GoodsOrderIssueListView(ListAPIView):
     queryset = GoodsOrder.objects.all()
     serializer_class = GoodsIssueSerializer
@@ -195,7 +192,10 @@ class LeakageListCreateView(ListCreateAPIView):
     permission_classes = [
         IsAuthenticated,
     ]
-    authentication_classes = [BasicAuthentication,TokenAuthentication,]
+    authentication_classes = [
+        BasicAuthentication,
+        TokenAuthentication,
+    ]
 
     def perform_create(self, serializer):
         return serializer.save(added_by=self.request.user)
@@ -204,4 +204,58 @@ class LeakageListCreateView(ListCreateAPIView):
 class LeakageRetrieveDestroyAPIView(RetrieveDestroyAPIView):
     queryset = Leakage.objects.all()
     serializer_class = LeakageSerializer
-    lookup_field='id'
+    lookup_field = "id"
+
+
+class TemporaryGoodsUpdateListCreateAPIView(ListCreateAPIView):
+    queryset = TemporaryGoodsUpdate.objects.all()
+    serializer_class = TemporaryGoodsUpdateSerializer
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    authentication_classes = [
+        BasicAuthentication,
+        TokenAuthentication,
+    ]
+
+    def perform_create(self, serializer):
+        return serializer.save(updated_by=self.request.user)
+
+    def get(self, request, *args, **kwargs):
+        request_user = request.user
+        user_company = request_user.user_company
+        users = get_user_model().objects.filter(user_company=user_company)
+        filtered_data = self.get_queryset().filter(updated_by__in=users)
+        serializer = self.serializer_class(filtered_data, many=True)
+        serialized_data = serializer.data
+        return Response({"count": len(serialized_data), "results": serialized_data})
+
+    def post(self, request, *args, **kwargs):
+        is_many = isinstance(request.data, list)
+
+        serializer = self.get_serializer(data=request.data, many=is_many)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            {
+                "count": len(serializer.data),
+                "status": status.HTTP_200_OK,
+                "result": serializer.data,
+            },
+            status=status.HTTP_201_CREATED,
+            headers=headers,
+        )
+
+
+class TemporaryGoodsUpdateRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = TemporaryGoodsUpdate.objects.all()
+    serializer_class = TemporaryGoodsUpdateSerializer
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    authentication_classes = [
+        BasicAuthentication,
+        TokenAuthentication,
+    ]
+    lookup_field = "id"

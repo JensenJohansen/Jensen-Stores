@@ -168,24 +168,29 @@ class UpdateStockSerializer(serializers.ModelSerializer):
     A serializer for updating stock(goods) when issuing or adding new stock
     """
     goods = serializers.PrimaryKeyRelatedField(queryset=Goods.objects.all())
-    updated_by = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    updated_by = serializers.PrimaryKeyRelatedField(queryset=get_user_model().objects.all())
     balance = serializers.IntegerField(read_only=True)
+    authorized_by=serializers.SlugRelatedField(slug_field='username',read_only=True)
     
     class Meta:
         model = GoodsUpdate
         fields = '__all__'
-        read_only_fields=['quantity_available',]
+        read_only_fields=['quantity_available','authorized_by',]
         
     def create(self, validated_data):
         goods = validated_data.pop('goods')
-        
         # get request user
         request=self.context.get('request')
         
-        if request:
+        if request and 'updated_by' not in validated_data:
             request_user=request.user
         else:
             request_user=validated_data['updated_by']
+            
+        if request:
+            authorizer=request.user
+        else:
+            authorizer=validated_data['authorized_by']
         
         try:
             goods = Goods.objects.get(id=goods.id)
@@ -202,6 +207,7 @@ class UpdateStockSerializer(serializers.ModelSerializer):
                 goods_update = GoodsUpdate.objects.create(
                     goods=goods,
                     updated_by=request_user,
+                    authorized_by=authorizer,
                     quantity_available=quantity_available,
                     quantity_added=validated_data['quantity_added'],
                     goods_update_reason=validated_data['goods_update_reason'] if validated_data['goods_update_reason'] else "updated_stock"
@@ -225,9 +231,9 @@ class GoodsIssueSerializer(serializers.ModelSerializer):
         instance.issuer = validated_data.get('issuer', instance.issuer)
         
         if not instance.issued_status:
-            updated_stock = UpdateStockSerializer(data={"request_user":instance.issuer, "goods":instance.goods.id, "quantity_added":-instance.goods_quantity})
+            updated_stock = UpdateStockSerializer(data={"updated_by":instance.issuer,"goods":instance.goods.id, "quantity_added":-instance.goods_quantity,"goods_update_reason":"issued_order"})
             if updated_stock.is_valid():
-                updated_stock.save()      
+                updated_stock.save(authorized_by=instance.issuer)      
         
         instance.issued_status = validated_data.get('issued_status', instance.issued_status)
         instance.save()
@@ -241,3 +247,38 @@ class GoodsTypeSerializer(serializers.ModelSerializer):
         fields='__all__'
         
 
+class TemporaryGoodsUpdateSerializer(serializers.ModelSerializer):
+    quantity_available=serializers.IntegerField(read_only=True)
+    class Meta:
+        model = TemporaryGoodsUpdate
+        fields = '__all__'
+        read_only_fields=['updated_by',]
+        
+    def create(self, validated_data):
+        goods = validated_data.pop('goods')
+        # get request user
+        request=self.context.get('request')
+        
+        if request:
+            request_user=request.user
+        else:
+            request_user=validated_data['updated_by']
+        
+        try:
+            goods = Goods.objects.get(id=goods.id)
+        except Goods.DoesNotExist:
+            raise serializers.ValidationError({"goods": "The goods you entered do not exist."})
+        
+        try:
+            goods_update = self.Meta.model.objects.create(
+                goods=goods,
+                updated_by=request_user,
+                quantity_added=validated_data['quantity_added'],
+                )
+        except Exception as e:
+                raise e
+        return goods_update
+    
+    def to_representation(self, instance):
+        instance.quantity_available=instance.goods.goods_quantity
+        return super().to_representation(instance)

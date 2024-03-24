@@ -15,4 +15,6 @@ urlpatterns = [
     path("least_goods_quantity/<int:threshold>/", LeastStockGoodsListAPIView.as_view(), name="least_goods_quantity"),
     path("order_issue_goods/", GoodsOrderIssueListView.as_view(), name="goods-issue"),
     path("order_issue_goods/<int:id>/", GoodsOrderIssueCreateAPIView.as_view(), name="issue"),
+    path("temporary_goods_update/", TemporaryGoodsUpdateListCreateAPIView.as_view(), name="temporary_goods_update"),
+    path("temporary_goods_update/<int:id>/", TemporaryGoodsUpdateRetrieveUpdateDestroyAPIView.as_view(), name="single_temporary_update"),
 ]
