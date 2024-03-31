@@ -282,3 +282,13 @@ class TemporaryGoodsUpdateSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         instance.quantity_available=instance.goods.goods_quantity
         return super().to_representation(instance)
+    
+
+class GoodsDeleteByUserSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+
+    def delete_goods(self):
+        user_id = self.validated_data.get('user_id')
+        user=get_user_model().objects.get(id=user_id)
+        goods_deleted = Goods.objects.filter(added_by=user).delete()
+        return goods_deleted

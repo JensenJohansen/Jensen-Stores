@@ -4,6 +4,7 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import (
     IsAuthenticated,
 )
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.status import *
 from django.db.models import F
@@ -259,3 +260,19 @@ class TemporaryGoodsUpdateRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIV
         TokenAuthentication,
     ]
     lookup_field = "id"
+
+
+class DeleteGoodsByUserView(APIView):
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    authentication_classes = [
+        BasicAuthentication,
+        TokenAuthentication,
+    ]
+    def post(self, request):
+        serializer = GoodsDeleteByUserSerializer(data=request.data)
+        if serializer.is_valid():
+            goods_deleted = serializer.delete_goods()
+            return Response({'message': f'Successfully deleted {goods_deleted[0]} goods'})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

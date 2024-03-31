@@ -17,4 +17,5 @@ urlpatterns = [
     path("order_issue_goods/<int:id>/", GoodsOrderIssueCreateAPIView.as_view(), name="issue"),
     path("temporary_goods_update/", TemporaryGoodsUpdateListCreateAPIView.as_view(), name="temporary_goods_update"),
     path("temporary_goods_update/<int:id>/", TemporaryGoodsUpdateRetrieveUpdateDestroyAPIView.as_view(), name="single_temporary_update"),
+    path("delete_goods_by_user/", DeleteGoodsByUserView.as_view(), name="user_goods_delete")
 ]
