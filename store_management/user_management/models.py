@@ -48,7 +48,7 @@ class AppUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=100, blank=True, null=True)
     user_company = models.ForeignKey(Company, verbose_name=_("Users company"), related_name='user_company',
                                     on_delete=models.CASCADE, null=True, blank=True)
-    groups = models.ManyToManyField(Group, verbose_name=_("app users"), blank=True, null=True)
+    groups = models.ManyToManyField(Group, verbose_name=_("app users"), blank=True)
     is_staff = models.BooleanField(_("Is a user staff"), default=False)
     is_active = models.BooleanField(_("Is a user active"), default=True)
 
