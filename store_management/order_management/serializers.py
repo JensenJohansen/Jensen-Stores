@@ -204,7 +204,7 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
                     instance.issuer=issuer
                 else:
                     quantity = instance.goods_quantity
-                instance.save()
+                
                 # Serialize stock update data and save it
                 stock_data = {'updated_by':issuer,'goods': instance.goods.id, 'quantity_added': quantity,'goods_update_reason':'issued_order'}
                 stock_serial = stock_serializer.UpdateStockSerializer(data=stock_data)
@@ -212,6 +212,7 @@ class GoodsOrderSerializer(serializers.ModelSerializer):
                 if stock_serial.is_valid():
                     stock_serial.save(authorized_by=issuer)
 
+                instance.save()
                 # Update order issued status based on all items' issued_status in the order
                 order = instance.order
                 order.issued_status = all(item.issued_status for item in order.order_goods.all())
