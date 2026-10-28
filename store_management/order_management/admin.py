@@ -3,6 +3,8 @@ from .models import *
 
 # Register your models here.
 
-admin.site.register(OrderStatus)
 admin.site.register(Order)
 admin.site.register(GoodsOrder)
+admin.site.register(DeletedOrder)
+admin.site.register(Payment)
+admin.site.register(AuditLog)

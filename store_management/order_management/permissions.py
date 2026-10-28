@@ -14,7 +14,7 @@ class IsPaidOrEditable(permissions.BasePermission):
         if not authorization.authorization_status:
             return True
         
-        if authorization.authorization_status.status != 'paid':
+        if authorization.authorization_status != 'paid':
             return True
         
         return False

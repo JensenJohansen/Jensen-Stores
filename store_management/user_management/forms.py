@@ -7,11 +7,31 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = AppUser
-        fields = ("username",)
+        fields = (
+            "username",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "email",
+            "user_company",
+            "groups",
+            "is_staff",
+            "is_active",
+        )
 
 
 class CustomUserChangeForm(UserChangeForm):
 
     class Meta:
         model = AppUser
-        fields = ("username",)
+        fields = (
+            "username",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "email",
+            "user_company",
+            "groups",
+            "is_staff",
+            "is_active",
+        )

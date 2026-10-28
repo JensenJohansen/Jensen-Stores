@@ -16,7 +16,25 @@ Including another URLconf
 """
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import include, path, re_path
+
+try:
+    from rest_framework import permissions
+    from drf_yasg import openapi
+    from drf_yasg.views import get_schema_view
+except ImportError:
+    schema_view = None
+else:
+    schema_view = get_schema_view(
+        openapi.Info(
+            title="Jensen Stores API",
+            default_version="v1",
+            description="API documentation for authentication, stock management, and order workflows.",
+            contact=openapi.Contact(email="support@jensenstores.local"),
+        ),
+        public=True,
+        permission_classes=(permissions.AllowAny,),
+    )
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -24,5 +42,20 @@ urlpatterns = [
     path("jensen/stock/", include('stock_management.urls')),
     path("jensen/order/", include('order_management.urls')),
 ]
+
+if schema_view is not None:
+    urlpatterns = [
+        path("admin/", admin.site.urls),
+        re_path(
+            r"^swagger(?P<format>\.json|\.yaml)$",
+            schema_view.without_ui(cache_timeout=0),
+            name="schema-json",
+        ),
+        path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
+        path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+        path("jensen/auth/", include('user_management.urls')),
+        path("jensen/stock/", include('stock_management.urls')),
+        path("jensen/order/", include('order_management.urls')),
+    ]
 
 urlpatterns+=staticfiles_urlpatterns()

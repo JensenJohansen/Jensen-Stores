@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
+import importlib.util
 from pathlib import Path
 import environ
 
@@ -17,11 +18,12 @@ import environ
 from datetime import timedelta
 from rest_framework.settings import api_settings
 
-# Initialise environment variables
-env = environ.Env()
-environ.Env.read_env()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Initialise environment variables from the project root.
+env = environ.Env()
+environ.Env.read_env(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -54,12 +56,16 @@ INSTALLED_APPS = [
 
 ]
 
+if importlib.util.find_spec("drf_yasg") is not None:
+    INSTALLED_APPS.append("drf_yasg")
+
 AUTH_USER_MODEL = "user_management.AppUser"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     'corsheaders.middleware.CorsMiddleware',
+    "store_management.error_middleware.ApiErrorMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -132,6 +138,21 @@ REST_KNOX = {
     'TOKEN_LIMIT_PER_USER': None,
     'AUTO_REFRESH': False,
     'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
+}
+
+SWAGGER_SETTINGS = {
+    "USE_SESSION_AUTH": False,
+    "SECURITY_DEFINITIONS": {
+        "Basic": {
+            "type": "basic",
+        },
+        "Token": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "Knox token authentication. Use `Token <your-token>`.",
+        },
+    },
 }
 
 
